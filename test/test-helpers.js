@@ -127,7 +127,7 @@ function seedUsers(db, data) {
 
 function cleanTables(db) {
     return db.raw(
-        'TRUNCATE reviews,  campsites, users  RESTART IDENTITY CASCADE'
+        'TRUNCATE users  RESTART IDENTITY CASCADE'
     )
 }
 

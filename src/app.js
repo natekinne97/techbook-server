@@ -12,6 +12,8 @@ const app = express()
 const authRouter = require('./auth/auth-router');
 const resRouter = require('./reset-password/reset-router');
 
+const postRouter = require('./posts/posts');
+
 // logger
 app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
     skip: () => NODE_ENV === 'test',
@@ -20,9 +22,14 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 // logger and cors
 app.use(cors())
 app.use(helmet())
-// endpoints
+
+//endpoints
+app.use('/api/posts', postRouter); 
+
+// authentication endpoints
 app.use('/api/auth', authRouter);
 app.use('/api/reset', resRouter);
+
 
 // catch all error handler
 app.use(function errorHandler(error, req, res, next) {

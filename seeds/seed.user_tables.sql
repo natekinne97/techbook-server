@@ -1,7 +1,9 @@
 BEGIN;
 
 TRUNCATE
-  users
+  users,
+  comments,
+  posts
   RESTART IDENTITY CASCADE;
 
 -- insert new user values
@@ -19,6 +21,19 @@ VALUES
   ('lexlor', 'Alex Taylor', 'ataylor@gmail.com', '$2a$12$9YDhqae2Hqt.w9io46C1fO/is48ebGbA0vRSX8xtHcVtX30TAPjd2'),
   -- ping-password            wippy@gmail.com
   ('wippy', 'Ping Won In', 'wippy@gmail.com', '$2a$12$/jAv6ITFFzjO4kaGUK6M5O2cy2OUv3hj8i0HnsPR4CPMCIdRrr5G6');
+
+
+INSERT INTO posts(post, user_id)
+VALUES 
+  ('How do I convert a string to an integer?', 1),
+  ('How do I make json a string?', 2),
+  ('Anyone interested in Java 8?', 3);
+
+INSERT INTO comments(comment,  post_id, user_id)
+VALUES  
+  ('Use parseInt()', 1, 3),
+  ('Use JSON.stringify', 2, 1),
+  ('Ew never. The GUI is terrible to work with.', 3, 1);
 
 
 COMMIT;
