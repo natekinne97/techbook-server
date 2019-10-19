@@ -15,22 +15,21 @@ class Comment extends Model {
     static get relationMappings() {
         return {
             post: {
-                relation: Model.BelongsToOneRelation,
+                relation: Model.HasOneRelation,
                 modelClass: Post,
                 join: {
                     from: 'comments.post_id',
                     to: 'posts.id'
                 },
-                // get user information on comments
-                users: {
-                    relation: Model.HasOneRelation,
-                    modelClass: Users,
-                    join: {
-                        from: 'users.id',
-                        to: 'comments.user_id'
-                    }
+            },
+            // get user information on comments
+            users: {
+                relation: Model.HasOneRelation,
+                modelClass: Users,
+                join: {
+                    from: 'users.id',
+                    to: 'comments.user_id'
                 }
-
             }
         }
     }
@@ -59,8 +58,8 @@ class Post extends Model{
                 relation: Model.HasOneRelation,
                 modelClass: Users,
                 join: {
-                    from: 'posts.id',
-                    to: 'users.id'
+                    from: 'users.id',
+                    to: 'posts.user_id'
                 }
             }
         }
@@ -75,9 +74,6 @@ class Users extends Model {
         return 'users'
     }
 
-    static get relationMappings() {
- 
-    }
 }
 
 module.exports = {Post, Comment, Users}

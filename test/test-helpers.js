@@ -1,49 +1,62 @@
 const jwt = require('jsonwebtoken')
+const moment = require('moment');
 
-// make array for seeding the db
-function makeCampsitesArray() {
+// make posts array
+function makePostsArray() {
+    // (post, user_id)
     return [
         {
             id: 1,
-            img: 'https://i.imgur.com/ELRFWHvb.jpg',
-            name: 'Bayou place',
-            description: 'A beautiful bayou great for fishing',
-            park: 'Okefenokee Swamp National Park',
-            city: 'Williamsburg',
-            state: 'Georgia'
+            post: "some post",
+            user_id: 2,
         },
         {
             id: 2,
-            img: 'https://i.imgur.com/JGdoWLe.jpg',
-            name: 'Mountain Place',
-            description: 'Perched atop a mountain meadow this site offers great birdwatching',
-            park: 'Black Mountain',
-            city: 'Boise',
-            state: 'Idaho'
-        }
+            post: "some post",
+            user_id: 1,
+        },
+        
     ]
 }
 
+// make comments
+function makeCommentsArray(){
+    return[
+        {
+            id: 1,
+            comment: "some comment",
+            user_id: 1,
+            post_id: 1
+        },
+        {
+            id: 1,
+            comment: "some comment",
+            user_id: 1,
+            post_id: 1
+        },
 
-function makeReviewArray() {
-    // (text, rating, campsite_id, user_id)
+    ];
+}
+
+// we cannot insert the same data we retrieve
+function makePostResponse(){
+    // id, post, user, user_id, date_created
     return [
         {
             id: 1,
-            text: 'This place is great. definitly going again',
-            rating: 5,
-            campsite_id: 1,
-            user_id: 1
-
+            post: "some post",
+            user: "dunder mifflin",
+            date_created: moment().format(),
+            user_id: 2,
         },
         {
             id: 2,
-            text: 'A great place to camp',
-            rating: 5,
-            campsite_id: 2,
-            user_id: 2
-        }
-    ]
+            post: "some post",
+            user: "human person",
+            date_created: new Date().toISOString(),
+            user_id: 1,
+        },
+    ];
 }
 
 // finds the user with the token given
@@ -61,7 +74,7 @@ function makeUserArray() {
         {
             id: 1,
             user_name: 'dunder',
-            full_name: 'dunder miffilin',
+            full_name: 'dunder mifflin',
             email: 'blah@gmail.com',
             password: '$2a$12$3MsnYDHU0g.FBXkHU5qNiOVM/KT.2LXho7D6TZwbOKLFJBmSbHFbG'
         },
@@ -83,38 +96,6 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
     return `Bearer ${token}`
 }
 
-function seedCampsites(db, data) {
-    return db.insert(data)
-        .into('campsites')
-        .returning('*')
-        .then(rows => {
-            return rows[0];
-        })
-}
-
-function seedReviews(db, data) {
-    return db.insert(data)
-        .into('reviews')
-        .returning('*')
-        .then(rows => {
-            return rows[0];
-        })
-}
-
-function seedReviews2(db, users, reviews) {
-    return db.transaction(async trx => {
-        await seedUsers(trx, users);
-        await trx.into('reviews')
-            .insert(reviews)
-            .returning('*')
-            .then(rows => {
-                console.log(rows, 'rows being returned')
-                return rows[0];
-            });
-
-        console.log('seeding reviews');
-    })
-}
 
 function seedUsers(db, data) {
     return db.insert(data)
@@ -125,22 +106,48 @@ function seedUsers(db, data) {
         })
 }
 
+// insert the posts into db
+function seedPosts(db, data){
+    console.log(data);
+    return db.insert(data)
+            .into('posts')
+            .returning('*')
+            .then(rows => {
+                return rows[0];
+            })
+}
+
+// insert comments
+function seedComments(db, data){
+    return db.insert(data)
+            .into('comments')
+            .returning('*')
+            .then(rows => {
+                return rows[0];
+            })
+}
+
 function cleanTables(db) {
     return db.raw(
-        'TRUNCATE users  RESTART IDENTITY CASCADE'
+        'TRUNCATE users, posts  RESTART IDENTITY CASCADE'
     )
 }
 
 
 module.exports = {
-    makeCampsitesArray,
-    makeReviewArray,
+    // make data
+    makePostsArray,
     makeUserArray,
-    seedCampsites,
-    seedReviews,
-    seedReviews2,
+    makeCommentsArray,
+    // response data
+    makePostResponse,
+    // insert data
+    seedPosts,
     seedUsers,
+    seedComments,
+    // clean tables
     cleanTables,
+    // authentication
     makeAuthHeader,
     getUserWithTokens,
 }

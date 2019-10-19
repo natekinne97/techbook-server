@@ -3,7 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers');
 
-describe.only('Email password reset test', () => {
+describe('Email password reset test', () => {
     let db;
     const users = helpers.makeUserArray();
 
