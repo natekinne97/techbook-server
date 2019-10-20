@@ -3,7 +3,23 @@ const UsersService = require('./users-service')
 const AuthService = require('../auth/auth-service');
 const usersRouter = express.Router()
 const jsonBodyParser = express.json()
+const {Users} = require('../models/schema');
+const { requireAuth } = require('../middleware/jwt-auth');
 
+
+// serialize user for profile info
+serializeUser = user =>{
+  return {
+      id: user.id,
+      full_name: user.full_name,
+      user_name: user.user_name,
+      bio: user.bio,
+      occupation: user.occupation
+  };
+}
+
+
+// login
 usersRouter
     .post('/new-user', jsonBodyParser, (req, res, next) => {
         const { password, user_name, email, full_name } = req.body
@@ -73,5 +89,66 @@ usersRouter
             })
             .catch(next)
     })
+
+// here we are getting the user information to be displayed and possibly
+// edited by the front end. we only want to display the username full name
+// bio and occupation
+// in the future we may add more such as link to portfolio 
+// or link to project
+// get users profile information
+usersRouter
+    .route('/profile')
+    .get(requireAuth,async (req, res, next)=>{
+        const user = req.user;
+        const {profile} = req.query;
+        if(profile){
+            const users = await Users.query()
+                .where('id', `${profile}`);
+            res.json(serializeUser(users[0]));
+        }else{
+            const personal = await Users.query()
+                .where('id', `${user.id}`);
+            res.json(serializeUser(personal[0]));
+        }
+
+    });
+
+usersRouter.route('/update-user')
+    .patch(requireAuth ,jsonBodyParser,async (req, res, next)=>{
+        
+        // get data
+        const { user_name, full_name, bio, occupation } = req.body;
+        const user = req.user;
+        const updateUser = {
+            user_name: user_name,
+            full_name: full_name,
+            bio: bio,
+            occupation: occupation
+        };
+       
+        // check if user info has been added
+        Object.keys(updateUser).forEach(key=>{
+            console.log('printing keys');
+            console.log(key, 'key');
+            if(!updateUser[key])res.status(400).json({
+                error: `Missing key in ${key}.`
+            })
+        });
+
+        const updated = await Users.query()
+                    .update(updateUser)
+                    .where('id', `${user.id}`);
+
+       
+        if(!updated){
+            res.status(400).json({
+                error: "Unable to update profile"
+            })
+        }
+
+        res.status(200).json(updated[0]);
+
+    });
+
 
 module.exports = usersRouter

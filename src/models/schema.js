@@ -74,6 +74,21 @@ class Users extends Model {
         return 'users'
     }
 
+    static get jsonSchema(){
+        return {
+            type: 'object',
+            required: ['user_name', 'full_name'],
+            properties: {
+                id: {type: 'integer'},
+                user_name: {type: 'string'},
+                full_name: {type: 'string'},
+                email: {type: 'string'},
+                password: {type: 'string'},
+                resetpasswordtoken: {type: 'string'},
+                resetpasswordexpires: {type: 'string'}
+            }
+        }
+    }
 }
 
 module.exports = {Post, Comment, Users}

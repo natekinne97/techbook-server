@@ -11,6 +11,7 @@ const app = express()
 // endpoints
 const authRouter = require('./auth/auth-router');
 const resRouter = require('./reset-password/reset-router');
+const usersRouter = require('./users/users-router');
 
 const postRouter = require('./posts/posts');
 
@@ -29,7 +30,7 @@ app.use('/api/posts', postRouter);
 // authentication endpoints
 app.use('/api/auth', authRouter);
 app.use('/api/reset', resRouter);
-
+app.use('/api/users', usersRouter);
 
 // catch all error handler
 app.use(function errorHandler(error, req, res, next) {
