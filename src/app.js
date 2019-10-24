@@ -12,8 +12,9 @@ const app = express()
 const authRouter = require('./auth/auth-router');
 const resRouter = require('./reset-password/reset-router');
 const usersRouter = require('./users/users-router');
-
+const commentRouter = require('./comments/comments-router');
 const postRouter = require('./posts/posts');
+const searchRouter = require('./search/search');
 
 // logger
 app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
@@ -31,6 +32,8 @@ app.use('/api/posts', postRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/reset', resRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/comments', commentRouter);
+app.use('/api/search', searchRouter);
 
 // catch all error handler
 app.use(function errorHandler(error, req, res, next) {

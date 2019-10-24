@@ -1,33 +1,26 @@
 const express = require('express')
 
-const { Post, Comment, Users } = require('../models/schema')
+const { Post, Comment, Users, Voted } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
+const postService = require('./postService');
 const postRouter = express.Router()
 const {requireAuth} = require('../middleware/jwt-auth');
 
 // cleanse the post
 serializePost = post=>{
+    
     return {
         id: post.id,
         post: xss( post.post),
         date_created: post.date_created,
         user: xss(post.users.full_name),
-        user_id: post.user_id
+        user_id: post.user_id,
+        votes: post.voted
     }
 }
 
-// cleanse and send certian data
-serializeComment = comment=>{
-    return{
-        id: comment.id,
-        date_created: comment.date_created,
-        user_id: comment.user_id,
-        user: comment.users.full_name,
-        comment: comment.comment
-    }
-}
 
 /*
 
@@ -36,56 +29,127 @@ POSTS
 */
 
 postRouter.route('/')
-        .get(  async (req, res, next)=>{
-            try{
-                console.log('getting called')
-                // get the data
-                const posts = await Post.query()
-                                .orderBy('date_created', 'desc')
-                                .eager('users');
-         
+        .get(  (req, res, next)=>{
+           
 
-                // check if there is data
-                if (!posts) res.status(400).json({ error: "database empty" });
-                // send the data back serialized
-                res.status(200).json(posts.map(serializePost));
-            }catch(e){
-                console.log(e, ' error occured')
-                console.log('error occured in retrieving data');
-                res.status(400).json({
-                    error: "something went wrong"
-                })
-            }
+            postService.getAllPosts(
+                    req.app.get('db')
+                ).then(posts=>{
+                    
+                    res.json(posts.rows);
+                }).catch(next);
+
+               
             
         });
 
 
 // insert new post
 postRouter.route('/')
-        .post(requireAuth, jsonBodyParser, async (req, res, next)=>{
-            const {post} = req.body;
-            const user = req.user;
-           
-            const newPost = {
-                post: post,
-                user_id: user.id
-            }
-            // ensure there is nothing missing here
-            Object.keys(newPost).forEach(key=>{
-                if(!newPost[key])res.status(400).json({
-                    error: `Missing field in ${key}`
-                })
-            });
-            // insert the post. allowing the user to only insert
-            // the new post and user_id
-            const postInserted = await Post.query()
-                                    .allowInsert('[post, user_id]')
-                                    .insert(newPost)
-                                    .eager('users');
-                        
-            res.json(serializePost(postInserted));
+    .post(requireAuth, jsonBodyParser, async (req, res, next) => {
+        const { post } = req.body;
+        const user = req.user;
 
+        const newPost = {
+            post: post,
+            user_id: user.id
+        }
+        // ensure there is nothing missing here
+        Object.keys(newPost).forEach(key => {
+            if (!newPost[key]) res.status(400).json({
+                error: `Missing field in ${key}`
+            })
         });
+        // insert the post. allowing the user to only insert
+        // the new post and user_id
+        const postInserted = await Post.query()
+            .allowInsert('[post, user_id]')
+            .insert(newPost)
+            .eager('users');
+
+        res.json(serializePost(postInserted));
+
+    });
+
+
+
+/*
+=================
+VOTES
+=================
+*/
+
+
+// this is where we handle the votes on the posts
+// we have up votes and down votes. 
+// it increases when a 1 is sent and decreases when a 0 is sent.
+// we patch update the votes.
+postRouter.route('/votes')
+        .post( requireAuth, jsonBodyParser,async (req, res, next)=>{
+            console.log('votes was called');
+            const {vote, post_id} = req.body;
+            const user = req.user;
+            
+           
+            if(!user){
+                res.status(400).json("no user");
+            }
+            // ensure the client sent the post id
+            if(!post_id){
+               return res.status(400).json({
+                    error: "Must include post id."
+                })
+            }
+            
+
+            // check that the client sent the right number
+            if(Number(vote) != 1 && Number(vote) != -1){
+               return res.status(400).json({
+                    error: "Votes can either be 1 or -1."
+                })
+            }
+
+            const found = await Voted.query()
+                                .where({
+                                    user_id: user.id,
+                                    post_id: post_id
+                                })  
+            
+
+            if(found.length === 0){
+                console.log('inserting')
+                
+                    // insert the like and user to db
+                    const inserted = await Voted.query()
+                        .insert({
+                            vote,
+                            post_id,
+                            user_id: user.id
+                        });
+
+                
+                
+                if(inserted){
+                    const finished = await Voted.query()
+                                        .where({
+                                            post_id: post_id
+                                        })  
+                                        .count('vote');
+
+                    res.status(200).json(finished);
+                }
+                                        
+            }else{ 
+                console.log('already voted')
+                res.status(200).json({
+                    message: "user already voted"
+                })
+            }
+
+          
+            
+        });
+
 
 /*
 
@@ -94,58 +158,5 @@ COMMENTS
 *************
 
 */
-
-// gets all comments for post
-postRouter.route('/comments/:id')
-    .get(requireAuth, async (req, res, next) => {
-        try {
-            //    console.log(req.params.id);
-            const comments = await Comment.query()
-                .where('post_id', `${req.params.id}`)
-                .eager('users');
-
-
-            //   check if there are comments
-            if (!comments) res.status(400).json({ error: "no comments found" })
-
-            res.status(200).json(comments.map(serializeComment));
-
-        } catch (e) {
-            res.status(400).json({ error: "Something went wrong" })
-            console.log(e);
-        }
-    });
-
-
-
-// insert new comment
-postRouter.route('/comment')
-    .post(requireAuth, jsonBodyParser, async (req, res, next) => {
-        const { comment, post_id } = req.body;
-        const user = req.user;
-
-        const newComment = {
-            comment: comment,
-            user_id: user.id,
-            post_id: post_id
-        }
-
-        // ensure there is nothing missing here
-        Object.keys(newComment).forEach(key => {
-            if (!newComment[key]) res.status(400).json({
-                error: `Missing field in ${key}`
-            })
-        });
-        // insert the post. allowing the user to only insert
-        // the new post and user_id
-        const commmentInserted = await Comment.query()
-            .allowInsert('[comment, user_id, post_id]')
-            .insert(newComment)
-            .eager('users');
-
-        res.json(serializeComment(commmentInserted));
-
-    });
-
 
 module.exports = postRouter;

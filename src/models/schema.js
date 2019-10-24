@@ -42,6 +42,7 @@ class Post extends Model{
         return 'posts'
     }
 
+
     static get relationMappings(){
         return{
             // has possibility to get comments with post 
@@ -61,8 +62,69 @@ class Post extends Model{
                     from: 'users.id',
                     to: 'posts.user_id'
                 }
+            },
+            voted: {
+                relation: Model.HasManyRelation,
+                modelClass: Voted,
+                join: {
+                    from: 'voted.post_id',
+                    to: 'posts.id'
+                }
+            
+                
             }
         }
+    
+    }//mappings
+
+    // json schema
+    static get jsonSchema(){
+        return {
+            type: 'object',
+            // required: ['post', 'user_id'],
+            properties: {
+                id: {type: 'integer'},
+                post: {type: 'string'},
+                user_id: {type: 'integer'},
+            }
+        }
+    }
+}
+
+class Voted extends Model{
+    static get tableName(){
+        return 'voted';
+    }
+
+    static get modifiers(){
+        return {
+            sum(query){
+                query.select('vote').count();
+            }
+        }
+    }
+
+    static get relationMappings(){
+       return {
+           users: {
+               relation: Model.HasManyRelation,
+               modelClass: Users,
+               join: {
+                   from: 'users.id',
+                   to: 'voted.id'
+               }
+           },
+
+           posts: {
+               relation: Model.HasOneRelation,
+               modelClass: Post,
+               join: {
+                   from: 'posts.id',
+                   to: 'voted.id'
+               }
+
+           }
+       }
     }
 }
 
@@ -91,4 +153,4 @@ class Users extends Model {
     }
 }
 
-module.exports = {Post, Comment, Users}
+module.exports = {Post, Comment, Users, Voted};

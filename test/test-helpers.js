@@ -29,7 +29,7 @@ function makeCommentsArray(){
             post_id: 1
         },
         {
-            id: 1,
+            id: 2,
             comment: "some comment",
             user_id: 1,
             post_id: 1
