@@ -1,17 +1,17 @@
 const express = require('express')
 
-const { Post, Users } = require('../models/schema')
+const { Post, Users, Group } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
 const searchRouter = express.Router()
 const { requireAuth } = require('../middleware/jwt-auth');
 
-// cleanse and filter users
-serializeUsers = user =>{
+// clean groups
+serializeGroup = group =>{
     return {
-        id: user.id,
-        full_name: user.full_name
+        id: group.id,
+        name: group.group_name
     }
 }
 
@@ -29,12 +29,19 @@ serializePost = post => {
 }
 
 
+serializePeople = people =>{
+    return {
+        id: people.id,
+        name: people.user_name
+    }
+}
+
 
 // here we are going to search for posts and users
 // we can search text in posts and users to add as friends
 // in the future we will have groups;
 searchRouter.route('/')
-            .post(jsonBodyParser, async (req, res, next)=>{
+            .post(requireAuth, jsonBodyParser, async (req, res, next)=>{
                 const {term} = req.body;
                 console.log(term, 'term');
                 if(!term){
@@ -51,21 +58,35 @@ searchRouter.route('/')
                             .eager('users')
                             .where('post', 'ilike', `%${term}%`);
                 
-                // send friends 
-                if(friends.length > 0){
-                    res.status(200).json({
-                        friends: friends.map(serializeUsers)
-                    });
-                }else if(posts.length > 0){
-                    res.status(200).json({
-                        posts: posts.map(serializePost)
-                    });
-                }else if(posts.length > 0 && friends.length > 0){
-                    res.status(200).json({
-                        posts: posts.map(serializePost),
-                        friends: friends.map(serializeUsers)
-                    });
-                }
+                // search for groups
+                const groups = await Group.query()
+                             .where('group_name', 'ilike', `%${term}%`);
+
+
+                // serialize friends
+                let people = friends.map(person=>{
+                    return serializePeople(person);
+                });
+
+                // serialize posts
+                let cleanPost = posts.map(post=>{
+                    return serializePost(post)
+                });
+                
+                // serialize groups
+                let groupList = groups.map(group=>{
+                    return serializeGroup(group);
+                });
+
+               
+                // send all the results
+               res.status(200).json({
+                    people: people,
+                    posts: cleanPost,
+                    groups: groupList
+               });
+
+                
 
                 
             });

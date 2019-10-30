@@ -9,12 +9,19 @@ const cors = require('cors')
 const { NODE_ENV } = require('./config')
 const app = express()
 // endpoints
+// authentication and password changing
 const authRouter = require('./auth/auth-router');
 const resRouter = require('./reset-password/reset-router');
+// users
 const usersRouter = require('./users/users-router');
+// posts
 const commentRouter = require('./comments/comments-router');
 const postRouter = require('./posts/posts');
+// searching
 const searchRouter = require('./search/search');
+// groups
+const groupRouter = require('./groups/groupsRouter');
+const memberRouter = require('./group-members/memberRouter');
 
 // logger
 app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
@@ -25,15 +32,18 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 app.use(cors())
 app.use(helmet())
 
-//endpoints
-app.use('/api/posts', postRouter); 
-
 // authentication endpoints
 app.use('/api/auth', authRouter);
 app.use('/api/reset', resRouter);
 app.use('/api/users', usersRouter);
+
 app.use('/api/comments', commentRouter);
+app.use('/api/posts', postRouter); 
+
 app.use('/api/search', searchRouter);
+
+app.use('/api/groups', groupRouter);
+app.use('/api/member', memberRouter);
 
 // catch all error handler
 app.use(function errorHandler(error, req, res, next) {

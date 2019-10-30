@@ -128,6 +128,43 @@ class Voted extends Model{
     }
 }
 
+// group model
+class Group extends Model{
+    static get tableName(){
+        return 'groups'
+    }
+    
+}
+
+// members of groups
+class Members extends Model{
+    static get tableName(){
+        return 'group_members'
+    }
+    // group and users
+    static get relationMappings(){
+        return {
+            group: {
+                relation: Model.HasManyRelation,
+                modelClass: Group,
+                join: {
+                    from: 'groups.id',
+                    to: 'group_members.group_id'
+                }
+            },
+            users: {
+                relation: Model.HasManyRelation,
+                modelClass: Users,
+                join: {
+                    from: 'users.id',
+                    to: 'group_members.user_id'
+                }
+            }
+        }
+    }
+
+}
+
 // user model for loading username information on the posts.
 // will also be used to send the user to the users profile
 // when link is finished
@@ -153,4 +190,4 @@ class Users extends Model {
     }
 }
 
-module.exports = {Post, Comment, Users, Voted};
+module.exports = {Post, Comment, Users, Voted, Group, Members};

@@ -3,7 +3,9 @@ BEGIN;
 TRUNCATE
   users,
   comments,
-  posts
+  posts,
+  groups,
+  group_members
   RESTART IDENTITY CASCADE;
 
 -- insert new user values
@@ -36,5 +38,22 @@ VALUES
   ('Use JSON.stringify', 2, 1),
   ('Ew never. The GUI is terrible to work with.', 3, 1);
 
+-- seed groups
+INSERT INTO groups(group_name, about, exp_lvl)
+VALUES
+  ('JavaScript', 'Ask any question here in the javascript group', 'Everyone'),
+  ('Java', 'Open to all questions regarding Java', 'Java 8 lovers'),
+  ('Python', 'Welcome all lovers of the python', 'Advanced python');
+
+-- seed group members
+INSERT INTO group_members(group_id, user_id)
+VALUES
+  (1, 1),
+  (1, 2),
+  (1, 3),
+  (2, 1),
+  (2, 3),
+  (3, 2),
+  (3, 1);
 
 COMMIT;
