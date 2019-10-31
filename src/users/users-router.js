@@ -98,10 +98,13 @@ usersRouter
 // get users profile information
 usersRouter
     .route('/profile')
-    .get(requireAuth,async (req, res, next)=>{
+    .get(async (req, res, next)=>{
+        console.log('getting called');
         const user = req.user;
+        console.log(req.query, 'query');
         const {profile} = req.query;
         if(profile){
+            console.log(profile, 'profile');
             const users = await Users.query()
                 .where('id', `${profile}`);
             res.json(serializeUser(users[0]));
