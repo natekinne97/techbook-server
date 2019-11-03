@@ -24,7 +24,7 @@ groupRouter.route('/')
         .get(requireAuth,async (req, res, next)=>{
             // get the data from db
             const groups = await Group.query();
-
+            
             // check if there was content
             if(groups != []){
                 res.status(200).json(groups.map(serializeGroups));

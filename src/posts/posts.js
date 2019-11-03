@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { Post, Voted } = require('../models/schema')
+const { Post, Voted, Members } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
@@ -21,6 +21,21 @@ serializePost = post=>{
     }
 }
 
+getPostsFromGroups = async (group_id, db) =>{
+
+    let post = await db.raw(`select posts.*, sum(voted.vote), users.full_name
+                from  users, posts left outer join voted 
+                on posts.id = voted.post_id  
+                where (users.id = posts.user_id and posts.group_id in (${group_id}))
+                group by posts.id, voted.post_id, users.full_name;`);
+
+    return  post.rows;
+   
+}
+
+
+
+
 
 /*
 
@@ -29,18 +44,61 @@ POSTS
 */
 
 postRouter.route('/')
-        .get(  (req, res, next)=>{
+        .get(requireAuth,async  (req, res, next)=>{
+            // database access
+            let db = req.app.get('db');
+
+            const {id} = req.query;
+            const user = req.user;
+            // get the user id
+            const user_id = user.id;
+            console.log(user_id, 'user id');
+            // get group id's of groups the user is in.
+            const groups = await  Members.query()
+                                    .where('user_id', `${user_id}`);
+    
+            // get the friend id's of users friends.
+            // check if the user is in any groups or has friends
+            let group_ids;
+            if(groups){
+                // extract the ids
+                group_ids = groups.map(group=>{
+                    console.log(group);
+                    return group.group_id;
+                })
+                
+            }
+
+            console.log(id, 'id');
+
+            // default send all groups, friends when loading
+            if(!id){
+
+                try{
+                    // get all posts associated with groups.
+                    const posts = await getPostsFromGroups(group_ids, db);
+                    // send all posts
+                    res.json(posts);
+                }catch(err){
+                    console.log(err);
+                }
+               
+            }else if(id){
+                try{
+                    // this sends back posts specifically for groups
+                    const posts = await getPostsFromGroups(id, db);
+                    res.status(200).json(posts);    
+
+                }catch(err){
+                    console.log(err);
+                }
+                            
+        
+            }
+            
+
            
 
-            postService.getAllPosts(
-                    req.app.get('db')
-                ).then(posts=>{
-                    
-                    res.json(posts.rows);
-                }).catch(next);
-
-               
-            
         });
 
 

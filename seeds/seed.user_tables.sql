@@ -45,6 +45,13 @@ VALUES
   ('Java', 'Open to all questions regarding Java', 'Java 8 lovers'),
   ('Python', 'Welcome all lovers of the python', 'Advanced python');
 
+-- insert posts and assign them to different groups
+INSERT INTO posts(post, user_id, group_id)
+VALUES 
+  ('Why does everyone love Python?', 1, 3),
+  ('Why does everyone love Java', 3, 2),
+  ('Why does everyone love JavaScript?', 2, 1);
+
 -- seed group members
 INSERT INTO group_members(group_id, user_id)
 VALUES

@@ -98,20 +98,22 @@ usersRouter
 // get users profile information
 usersRouter
     .route('/profile')
-    .get(async (req, res, next)=>{
+    .get(requireAuth,async (req, res, next)=>{
         console.log('getting called');
         const user = req.user;
-        console.log(req.query, 'query');
+        
         const {profile} = req.query;
-        if(profile){
-            console.log(profile, 'profile');
+        
+        if(Number(profile) > 0){
+            
             const users = await Users.query()
                 .where('id', `${profile}`);
-            res.json(serializeUser(users[0]));
+            res.status(200).json(serializeUser(users[0]));
         }else{
+            console.log('sending current users info')
             const personal = await Users.query()
                 .where('id', `${user.id}`);
-            res.json(serializeUser(personal[0]));
+            res.status(200).json(serializeUser(personal[0]));
         }
 
     });
