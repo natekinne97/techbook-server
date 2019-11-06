@@ -22,6 +22,7 @@ const searchRouter = require('./search/search');
 // groups
 const groupRouter = require('./groups/groupsRouter');
 const memberRouter = require('./group-members/memberRouter');
+const friendsRouter = require('./friends/friendsRouter');
 
 // logger
 app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
@@ -37,13 +38,17 @@ app.use('/api/auth', authRouter);
 app.use('/api/reset', resRouter);
 app.use('/api/users', usersRouter);
 
+// post related
 app.use('/api/comments', commentRouter);
 app.use('/api/posts', postRouter); 
 
+// search
 app.use('/api/search', searchRouter);
 
+// user groupings
 app.use('/api/groups', groupRouter);
 app.use('/api/member', memberRouter);
+app.use('/api/friends', friendsRouter)
 
 // catch all error handler
 app.use(function errorHandler(error, req, res, next) {

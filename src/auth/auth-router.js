@@ -42,6 +42,7 @@ authRouter
                         // send the token
                         res.status(200).send({
                             authToken: AuthService.createJwt(sub, payload),
+                            user: sub
                         })
                     })
             })

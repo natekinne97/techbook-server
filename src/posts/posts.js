@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { Post, Voted, Members } = require('../models/schema')
+const { Post, Voted, Members, Friends } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
@@ -34,6 +34,29 @@ getPostsFromGroups = async (group_id, db) =>{
 }
 
 
+getFriendsPosts = async (friend_id, db) => {
+
+    let post = await db.raw(`select posts.*, sum(voted.vote), users.full_name
+                from  users, posts left outer join voted 
+                on posts.id = voted.post_id  
+                where (users.id = posts.user_id and posts.user_id in (${friend_id}))
+                group by posts.id, voted.post_id, users.full_name;`);
+
+    return post.rows;
+
+}
+
+getPersonalPosts = async (user, db) =>{
+    let post = await db.raw(`select posts.*, sum(voted.vote), users.full_name
+                from  users, posts left outer join voted 
+                on posts.id = voted.post_id  
+                where (users.id = posts.user_id and posts.user_id = ${user})
+                group by posts.id, voted.post_id, users.full_name;`);  
+
+    return post.rows; 
+}
+
+
 
 
 
@@ -56,6 +79,10 @@ postRouter.route('/')
             // get group id's of groups the user is in.
             const groups = await  Members.query()
                                     .where('user_id', `${user_id}`);
+            
+            // get friends posts
+            const friends = await Friends.query()
+                                .where('user_id', `${user_id}`);
     
             // get the friend id's of users friends.
             // check if the user is in any groups or has friends
@@ -69,6 +96,14 @@ postRouter.route('/')
                 
             }
 
+            // strip the list of friends id
+            let friend_id
+            if(friends){
+                friend_id = friends.map(friend=>{
+                    return friend.id;
+                })
+            }
+
             console.log(id, 'id');
 
             // default send all groups, friends when loading
@@ -76,7 +111,15 @@ postRouter.route('/')
 
                 try{
                     // get all posts associated with groups.
-                    const posts = await getPostsFromGroups(group_ids, db);
+                    const groupPosts = await getPostsFromGroups(group_ids, db);
+                    // get personal posts
+                    const personalPosts = await getPersonalPosts(user_id, db);
+                    // get all the posts from friends
+                    const friendPosts = await getFriendsPosts(friend_id, db);
+
+                    // concat the posts into on array
+                    const posts = [...groupPosts, ... personalPosts, ...friendPosts];
+
                     // send all posts
                     res.json(posts);
                 }catch(err){
@@ -192,8 +235,8 @@ postRouter.route('/votes')
                                         .where({
                                             post_id: post_id
                                         })  
-                                        .count('vote');
-
+                                        .sum('vote');
+                    console.log(finished);
                     res.status(200).json(finished);
                 }
                                         

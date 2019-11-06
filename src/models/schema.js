@@ -165,6 +165,28 @@ class Members extends Model{
 
 }
 
+
+// friends table associates all of the members.
+class Friends extends Model{
+    static get tableName(){
+        return 'friends';
+    }
+
+    static get relationMappings(){
+        return{
+            users: {
+                relation: Model.HasManyRelation,
+                modelClass: Users,
+                join: {
+                    from: 'users.id',
+                    to: 'friends.user_id'
+                }
+            }
+        }
+    }
+}
+
+
 // user model for loading username information on the posts.
 // will also be used to send the user to the users profile
 // when link is finished
@@ -190,4 +212,4 @@ class Users extends Model {
     }
 }
 
-module.exports = {Post, Comment, Users, Voted, Group, Members};
+module.exports = {Post, Comment, Users, Voted, Group, Members, Friends};
