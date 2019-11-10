@@ -99,7 +99,7 @@ usersRouter
 usersRouter
     .route('/profile')
     .get(requireAuth,async (req, res, next)=>{
-        console.log('getting called');
+       
         const user = req.user;
         
         const {profile} = req.query;
@@ -133,9 +133,8 @@ usersRouter.route('/update-user')
        
         // check if user info has been added
         Object.keys(updateUser).forEach(key=>{
-            console.log('printing keys');
-            console.log(key, 'key');
-            if(!updateUser[key])res.status(400).json({
+            
+            if(!updateUser[key])return res.status(400).json({
                 error: `Missing key in ${key}.`
             })
         });
@@ -146,7 +145,7 @@ usersRouter.route('/update-user')
 
        
         if(!updated){
-            res.status(400).json({
+            return  res.status(400).json({
                 error: "Unable to update profile"
             })
         }

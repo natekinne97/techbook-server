@@ -41,13 +41,12 @@ groupRouter.route('/:id')
         .get(requireAuth,async (req, res, next)=>{
             // get the id
             const id = req.params.id;
-            console.log(typeof id, 'id');
+            
            try{
                console.log('before the grab work now')
                // get the data
                const group = await Group.query().where('id', `${id}`);
-                console.log(group[0]);
-               console.log('working')
+                
                // check if group exists
                if (group != []) {
                    res.status(200).json(serializeGroups(group[0]));
@@ -87,7 +86,7 @@ groupRouter.route('/')
                             .where('group_name', group_name);
         
         if(exist.length > 0){
-            console.log(exist);
+           
            return res.status(400).json({
                 message: "Group name already exists. Please try a different one."
             });
@@ -96,13 +95,13 @@ groupRouter.route('/')
         // insert the new group
         const inserted = await Group.query()
                             .insert(newGroup);
-                            console.log(inserted, 'new group');
+                            
         // check if it was inserted
         if(inserted){
             res.status(200).json(inserted);
         }else{
             // error not inserted
-            console.log(inserted, 'inserted');
+           
             res.status(400).json({
                 error: "Error inserting group"
             })

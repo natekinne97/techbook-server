@@ -17,6 +17,7 @@ const usersRouter = require('./users/users-router');
 // posts
 const commentRouter = require('./comments/comments-router');
 const postRouter = require('./posts/posts');
+const votesRouter = require('./votes/votes');
 // searching
 const searchRouter = require('./search/search');
 // groups
@@ -30,7 +31,10 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 }))
 
 // logger and cors
-app.use(cors())
+app.use(cors({
+    credentials: true,
+}))
+
 app.use(helmet())
 
 // authentication endpoints
@@ -41,6 +45,7 @@ app.use('/api/users', usersRouter);
 // post related
 app.use('/api/comments', commentRouter);
 app.use('/api/posts', postRouter); 
+app.use('/api/votes', votesRouter);
 
 // search
 app.use('/api/search', searchRouter);

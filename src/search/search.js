@@ -11,7 +11,7 @@ const { requireAuth } = require('../middleware/jwt-auth');
 serializeGroup = group =>{
     return {
         id: group.id,
-        name: group.group_name
+        name: xss(group.group_name)
     }
 }
 
@@ -28,11 +28,11 @@ serializePost = post => {
     }
 }
 
-
+// clean the people
 serializePeople = people =>{
     return {
         id: people.id,
-        name: people.user_name
+        name: xss(people.full_name)
     }
 }
 
@@ -43,7 +43,7 @@ serializePeople = people =>{
 searchRouter.route('/')
             .post(requireAuth, jsonBodyParser, async (req, res, next)=>{
                 const {term} = req.body;
-                console.log(term, 'term');
+               
                 if(!term){
                     res.status(400).json({
                         error: "Must include search term"

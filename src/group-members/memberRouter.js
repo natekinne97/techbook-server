@@ -30,24 +30,23 @@ memberRouter.route('/check/:id')
                 // id associates the user and the group.
                 // the id is for the group id
                 const id = req.params.id;
-                console.log('checking if user is in group')
+               
                 try{
-                    console.log('checking user');
+                    
+                    // check if member is in the group
                     const inGroup = await Members.query()
-                                        
                                         .where({
                                             user_id: `${user.id}`,
                                             group_id: `${id}`
                                         });
-                    console.log(inGroup.length, 'in group');
-                    if(inGroup){
-                        console.log('the user')
-                        
+                   
+                    if(inGroup.length > 0){
+                        console.log('user is in the group')
                         return res.status(200).json({
-                            message: "The user is in this group"
+                            user: "The user is in this group"
                         });
                     }else{
-                        console.log('user is not in the group')
+                        console.log('user is in the group')
                         return  res.status(200).json({
                             message: "User is not this group"
                         })
@@ -68,17 +67,19 @@ memberRouter.route('/users-groups')
         .get(requireAuth, async (req, res, next)=>{
             const user = req.user;
             try{
+                
+                // search the db for a member with users id/
                 const group = await Members.query()
                                 .eager('group')
                                 .where('user_id', `${user.id}`);
 
                 
-                if(group){
+                if(group.length > 0){
                     // send only if there are groups
-                    console.log('groups user is in');
+                    console.log('not in the group')
                     return res.status(200).json(group.map(serializeMembers))
                 }else{
-                    
+                    console.log('user is not in any groups')
                     return res.status(200).json({
                         message: "user is not in any groups"
                     })
@@ -111,7 +112,7 @@ memberRouter.route('/add/:id')
                                     .insert(newMember);
                     
                    if(inserted){
-                       console.log('sending message');
+                       
                        // send the welcome message
                        res.status(200).json({
                            message: "Welcome to the group"
