@@ -1,6 +1,6 @@
 const express = require('express')
 const friendsRouter = express.Router()
-const { Friends } = require('../models/schema');
+const { Friend } = require('../models/schema');
 const { requireAuth } = require('../middleware/jwt-auth');
  
 // the friends table groups users together using the logged in
@@ -19,14 +19,14 @@ friendsRouter.route('/')
             // check if id is being used
             if(id){
                 console.log('id is being used')
-                const friends = await Friends.query()
+                const friends = await Friend.query()
                                 .where({
                                     user_id: id
                                 })
                 return res.status(200).json(friends);
             }
             // current user info if no id is sent on query.
-            const friends = await Friends.query()
+            const friends = await Friend.query()
                 .where({
                     user_id: user
                 })
@@ -54,7 +54,7 @@ friendsRouter.route('/check/:id')
         // test id needs to be 1
         try{
             // get the friends data
-            const friends = await Friends.query()
+            const friends = await Friend.query()
                             .where({
                                 user_id: user,
                                 friends_id: id
@@ -94,15 +94,15 @@ friendsRouter.route('/:id')
         // put in a try catch if nothing is returned then go on to the next try
        try{
            // first check if they are currently friends.
-           const currentFriends = await Friends.query()
+           const currentFriend = await Friend.query()
                .where({
                    user_id: user,
                    friends_id: id
                });
 
-           console.log(currentFriends, 'current friends');
+           console.log(currentFriend, 'current friends');
            // check if users are already friends
-           if (currentFriends.id) {
+           if (currentFriend.id) {
                console.log('it is there');
                return res.status(200).json("Already friends")
            } 
@@ -112,7 +112,7 @@ friendsRouter.route('/:id')
                 friends_id: id
            }
 
-            const insert = await Friends.query()
+            const insert = await Friend.query()
                                 .insert(newFriend);  
             console.log(insert);
             if(insert.id){

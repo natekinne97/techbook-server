@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { Post, Voted, Members, Friends } = require('../models/schema')
+const {  Voted } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');

@@ -23,7 +23,7 @@ describe('Email password reset test', () => {
     afterEach('cleanup', () => helpers.cleanTables(db))
 
     beforeEach('insert campsites', () => {
-        return helpers.seedUsers(db, users)
+        return helpers.seedUser(db, users)
             .then(() => {
                 console.log('users seeded');
             })

@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { Post, Users, Group } = require('../models/schema')
+const { Post, User, Group } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
@@ -51,7 +51,7 @@ searchRouter.route('/')
                 }
                 
                 // search for users
-                const friends = await Users.query()
+                const friends = await User.query()
                                     .where('full_name', 'ilike', `%${term}%`);
                 // search for posts
                 const posts = await Post.query()

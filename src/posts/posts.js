@@ -1,10 +1,9 @@
 const express = require('express')
 
-const { Post, Voted, Members, Friends } = require('../models/schema')
+const { Post, Member, Friend } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
-const postService = require('./postService');
 const postRouter = express.Router()
 const {requireAuth} = require('../middleware/jwt-auth');
 
@@ -23,14 +22,14 @@ serializePost = post=>{
 
 // fake post generated when not in any groups
 fakePost = ()=>{
-    return {
+    return [{
         id: 1,
         post: "Welcome to TeckBook! :)",
         date_created: Date.now(),
         user: "TeckBook",
         user_id: 0,
         votes: 99
-    }
+    }]
 }
 
 // accepts a groupd of ids
@@ -46,7 +45,7 @@ getPostsFromGroups = async (group_id, db) =>{
 }
 
 
-getFriendsPosts = async (friend_id, db) => {
+getFriendPosts = async (friend_id, db) => {
 
     let post = await db.raw(`select posts.*, sum(voted.vote), users.full_name
                 from  users, posts left outer join voted 
@@ -92,13 +91,13 @@ postRouter.route('/')
             const user_id = req.user.id;
             
             // get group id's of groups the user is in.
-            const groups = await  Members.query()
+            const groups = await  Member.query()
                                     .where({
                                         user_id: user_id
                                     });
             console.log(groups, 'groups');
             // get friends posts
-            const friends = await Friends.query()
+            const friends = await Friend.query()
                                 .where('user_id', `${user_id}`);
     
             
@@ -129,7 +128,7 @@ postRouter.route('/')
             console.log(friend_id, 'friend id');
             console.log(group_ids, 'group ids');
             // check if we should send anything back or just send the fakepost
-            if(!friend_id && !group_ids){
+            if(friends.length === 0 && groups.length === 0){
                 console.log('user is just starting out');
                 const fake_post = await fakePost();
                 return res.status(200).json(fake_post);
@@ -137,71 +136,32 @@ postRouter.route('/')
             // default send all groups, friends when loading
             if(!id){
 
-                try{
-                    console.log('getting group posts')
 
-                    const checks = {
-                        friends: false,
-                        groups: false
-                    }
-
-                    // check if there are group posts groupPosts
-                    // let groupPosts = [];
-                    // if(group_ids.length > 0){
-                    //     console.log('there are group posts')
-                    //     groupPosts = await getPostsFromGroups(group_ids, db);
-                    // }
-                    // console.log('getting personal posts')
-                    // get all posts associated with groups.
-                    const groupPosts = await getPostsFromGroups(group_ids, db);
-                    
-                    // get personal posts
-                    const personalPosts = await getPersonalPosts(user_id, db);
-                    console.log('getting friends posts');
-
-                    // let friendPosts = [];
-                    // if(friend_id.length > 0){
-                    //     console.log('get all friends posts');
-                        
-                    // }
-                    const friendPosts = await getFriendsPosts(friend_id, db);
-                    console.log(groupPosts, 'group');
-                    console.log(personalPosts, 'personalPosts');
-                    console.log(friendPosts, 'friend posts');
-
-                    //   ...personalPosts, 
-                    // concat the posts into on array
-                    const posts = [...groupPosts, ...personalPosts,   ...friendPosts];
-                    
-                    
-                    console.log(posts);
-                    // check if the user is new and has nothing
-                    
-
-                    // send all posts
-                    res.json(posts);
-                }catch(err){
-                    console.log('an error occured');
-                    console.log(err);
-                }
+                const groupPosts = group_ids && group_ids.length > 0 ? await getPostsFromGroups(group_ids, db) : [];
+                // get personal posts
+                const personalPosts = await getPersonalPosts(user_id, db);
+                console.log('getting friends posts');
+                const friendPosts = friend_id && friend_id.length > 0 ? await getFriendPosts(friend_id, db) : [];
+                
+                //   ...personalPosts, 
+                // concat the posts into on array
+                const posts = [...groupPosts, ...personalPosts,   ...friendPosts];
+                
+                
+                
+                // send all posts
+                res.json(posts);
+               
                
             }else if(id){
                 // sends back posts for a specific group
-                try{
+                
                     console.log('getting feedback with id');
                     // this sends back posts specifically for groups
                     const posts = await getPostGroupById(id, db);
                     res.status(200).json(posts);    
 
-                }catch(err){
-                    console.log(err);
-                }
-                            
-        
             }
-            
-
-           
 
         });
 

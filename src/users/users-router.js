@@ -1,9 +1,9 @@
 const express = require('express')
-const UsersService = require('./users-service')
+const UserService = require('./users-service')
 const AuthService = require('../auth/auth-service');
 const usersRouter = express.Router()
 const jsonBodyParser = express.json()
-const {Users} = require('../models/schema');
+const {User} = require('../models/schema');
 const { requireAuth } = require('../middleware/jwt-auth');
 
 
@@ -33,13 +33,13 @@ usersRouter
 
         // TODO: check user_name doesn't start with spaces
 
-        const passwordError = UsersService.validatePassword(password)
+        const passwordError = UserService.validatePassword(password)
 
         if (passwordError)
             return res.status(400).json({ error: passwordError })
 
         // first check if email is used to ensure no errors
-        UsersService.getUsernameWithEmail(
+        UserService.getUsernameWithEmail(
             req.app.get('db'),
             email
         )
@@ -54,7 +54,7 @@ usersRouter
 
 
         // make sure username doesnt already exist
-        UsersService.hasUserWithUserName(
+        UserService.hasUserWithUserName(
             req.app.get('db'),
             user_name
         )
@@ -62,7 +62,7 @@ usersRouter
                 if (hasUserWithUserName)
                     return res.status(400).json({ error: `Username already taken` })
 
-                return UsersService.hashPassword(password)
+                return UserService.hashPassword(password)
                     .then(hashedPassword => {
                         const newUser = {
                             user_name,
@@ -72,7 +72,7 @@ usersRouter
                             date_created: 'now()',
                         }
                         // insert to db
-                        return UsersService.insertUser(
+                        return UserService.insertUser(
                             req.app.get('db'),
                             newUser
                         )
@@ -106,12 +106,12 @@ usersRouter
         
         if(Number(profile) > 0){
             
-            const users = await Users.query()
+            const users = await User.query()
                 .where('id', `${profile}`);
             res.status(200).json(serializeUser(users[0]));
         }else{
             console.log('sending current users info')
-            const personal = await Users.query()
+            const personal = await User.query()
                 .where('id', `${user.id}`);
             res.status(200).json(serializeUser(personal[0]));
         }
@@ -139,7 +139,7 @@ usersRouter.route('/update-user')
             })
         });
 
-        const updated = await Users.query()
+        const updated = await User.query()
                     .update(updateUser)
                     .where('id', `${user.id}`);
 

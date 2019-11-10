@@ -41,7 +41,7 @@ describe('Post endpoints', ()=>{
         // seed database
         beforeEach('inserting data to db', () => {
             // insert users
-            return helpers.seedUsers(db, users)
+            return helpers.seedUser(db, users)
                 .then(() => {
                     console.log('users added')
                     // posts relies on users

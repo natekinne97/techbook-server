@@ -3,7 +3,7 @@ const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*
 const xss = require('xss')
 const bcrypt = require('bcryptjs')
 
-const UsersService = {
+const UserService = {
     // compare username with db
     hasUserWithUserName(db, user_name) {
         // change table to desired db
@@ -63,4 +63,4 @@ const UsersService = {
     },
 }
 
-module.exports = UsersService
+module.exports = UserService

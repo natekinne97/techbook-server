@@ -23,9 +23,9 @@ class Comment extends Model {
                 },
             },
             // get user information on comments
-            users: {
+            user: {
                 relation: Model.HasOneRelation,
-                modelClass: Users,
+                modelClass: User,
                 join: {
                     from: 'users.id',
                     to: 'comments.user_id'
@@ -57,7 +57,7 @@ class Post extends Model{
             },
             users: {
                 relation: Model.HasOneRelation,
-                modelClass: Users,
+                modelClass: User,
                 join: {
                     from: 'users.id',
                     to: 'posts.user_id'
@@ -108,7 +108,7 @@ class Voted extends Model{
        return {
            users: {
                relation: Model.HasManyRelation,
-               modelClass: Users,
+               modelClass: User,
                join: {
                    from: 'users.id',
                    to: 'voted.id'
@@ -137,7 +137,7 @@ class Group extends Model{
 }
 
 // members of groups
-class Members extends Model{
+class Member extends Model{
     static get tableName(){
         return 'group_members'
     }
@@ -154,7 +154,7 @@ class Members extends Model{
             },
             users: {
                 relation: Model.HasManyRelation,
-                modelClass: Users,
+                modelClass: User,
                 join: {
                     from: 'users.id',
                     to: 'group_members.user_id'
@@ -167,7 +167,7 @@ class Members extends Model{
 
 
 // friends table associates all of the members.
-class Friends extends Model{
+class Friend extends Model{
     static get tableName(){
         return 'friends';
     }
@@ -176,7 +176,7 @@ class Friends extends Model{
         return{
             users: {
                 relation: Model.HasManyRelation,
-                modelClass: Users,
+                modelClass: User,
                 join: {
                     from: 'users.id',
                     to: 'friends.user_id'
@@ -190,7 +190,7 @@ class Friends extends Model{
 // user model for loading username information on the posts.
 // will also be used to send the user to the users profile
 // when link is finished
-class Users extends Model {
+class User extends Model {
     static get tableName() {
         return 'users'
     }
@@ -212,4 +212,4 @@ class Users extends Model {
     }
 }
 
-module.exports = {Post, Comment, Users, Voted, Group, Members, Friends};
+module.exports = {Post, Comment, User, Voted, Group, Member, Friend};

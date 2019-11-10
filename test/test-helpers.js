@@ -97,7 +97,7 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
 }
 
 
-function seedUsers(db, data) {
+function seedUser(db, data) {
     return db.insert(data)
         .into('users')
         .returning('*')
@@ -143,7 +143,7 @@ module.exports = {
     makePostResponse,
     // insert data
     seedPosts,
-    seedUsers,
+    seedUser,
     seedComments,
     // clean tables
     cleanTables,

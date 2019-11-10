@@ -29,7 +29,7 @@ describe('User endpoints', () => {
         context('User validation', () => {
             // insert all the data to the database
             beforeEach('inserting data to db', () => {
-                return helpers.seedUsers(db, users)
+                return helpers.seedUser(db, users)
                     .then(() => {
                         console.log('users added')
                     });
