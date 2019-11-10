@@ -24,7 +24,7 @@ serializeComment = comment => {
 commentRouter.route('/:id')
     .get(requireAuth, async (req, res, next) => {
         try {
-            //    console.log(req.params.id);
+            //   find comments for post
             const comments = await Comment.query()
                 .where('post_id', `${req.params.id}`)
                 .eager('users');

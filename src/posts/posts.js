@@ -140,10 +140,10 @@ postRouter.route('/')
                 const groupPosts = group_ids && group_ids.length > 0 ? await getPostsFromGroups(group_ids, db) : [];
                 // get personal posts
                 const personalPosts = await getPersonalPosts(user_id, db);
-                console.log('getting friends posts');
+               
                 const friendPosts = friend_id && friend_id.length > 0 ? await getFriendPosts(friend_id, db) : [];
                 
-                //   ...personalPosts, 
+               
                 // concat the posts into on array
                 const posts = [...groupPosts, ...personalPosts,   ...friendPosts];
                 
@@ -156,10 +156,10 @@ postRouter.route('/')
             }else if(id){
                 // sends back posts for a specific group
                 
-                    console.log('getting feedback with id');
-                    // this sends back posts specifically for groups
-                    const posts = await getPostGroupById(id, db);
-                    res.status(200).json(posts);    
+                   
+                // this sends back posts specifically for groups
+                const posts = await getPostGroupById(id, db);
+                res.status(200).json(posts);    
 
             }
 

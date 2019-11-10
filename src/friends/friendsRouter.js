@@ -18,7 +18,7 @@ friendsRouter.route('/')
         try{
             // check if id is being used
             if(id){
-                console.log('id is being used')
+                
                 const friends = await Friend.query()
                                 .where({
                                     user_id: id
@@ -62,12 +62,10 @@ friendsRouter.route('/check/:id')
             
             // check if they are friends
             if(friends.length > 0){
-                console.log(friends, 'friends');
-                console.log('friends found')
+               
                 return res.status(200).json(friends);
             }else{
-                console.log(friends, 'friends');
-                console.log('not friends')
+               
                 return res.status(200).json({
                     message: "not friends"
                 })
@@ -87,10 +85,10 @@ friendsRouter.route('/:id')
         // the id is for the person that is going to be added as a friend
         const id = req.params.id;
         
-        console.log(id);
+      
         // get the current user
         const user = req.user.id;
-        console.log(user);
+       
         // put in a try catch if nothing is returned then go on to the next try
        try{
            // first check if they are currently friends.
@@ -103,7 +101,7 @@ friendsRouter.route('/:id')
            console.log(currentFriend, 'current friends');
            // check if users are already friends
            if (currentFriend.id) {
-               console.log('it is there');
+              
                return res.status(200).json("Already friends")
            } 
 
@@ -114,7 +112,7 @@ friendsRouter.route('/:id')
 
             const insert = await Friend.query()
                                 .insert(newFriend);  
-            console.log(insert);
+           
             if(insert.id){
                 res.status(200).json(insert);
             }else{

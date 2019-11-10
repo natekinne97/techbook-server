@@ -37,10 +37,9 @@ memberRouter.route('/users-groups')
 
             if (group.length > 0) {
                 // send only if there are groups
-                console.log('user is in the group in the group')
                 return res.status(200).json(group.map(serializeMember))
             } else {
-                console.log('user is not in any groups')
+               
                 return res.status(404).json({
                     message: "user is not in any groups"
                 })
@@ -71,12 +70,12 @@ memberRouter.route('/:id')
                                         });
                    
                     if(inGroup.length > 0){
-                        console.log('user is in the group')
+                       
                         return res.status(200).json({
                             user: "The user is in this group"
                         });
                     }else{
-                        console.log('user is not in the group')
+                       
                         return  res.status(404).json({
                             message: "User is not this group"
                         })
@@ -140,7 +139,7 @@ memberRouter.route('/:id')
 
 
                 }catch(err){
-                    console.log(err);
+                   
                     res.status(400).json({
                         error: "Something went wrong"
                     })

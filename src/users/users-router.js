@@ -110,7 +110,7 @@ usersRouter
                 .where('id', `${profile}`);
             res.status(200).json(serializeUser(users[0]));
         }else{
-            console.log('sending current users info')
+           
             const personal = await User.query()
                 .where('id', `${user.id}`);
             res.status(200).json(serializeUser(personal[0]));

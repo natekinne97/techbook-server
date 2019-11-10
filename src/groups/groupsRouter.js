@@ -43,7 +43,7 @@ groupRouter.route('/:id')
             const id = req.params.id;
             
            try{
-               console.log('before the grab work now')
+             
                // get the data
                const group = await Group.query().where('id', `${id}`);
                 
