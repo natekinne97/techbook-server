@@ -2,7 +2,7 @@ const app = require('../src/app');
 const helpers = require('./test-helpers');
 const knex = require('knex')
 
-describe.only('Post endpoints', ()=>{
+describe('Post endpoints', ()=>{
     let db;
 
     const posts = helpers.makePostsArray();
@@ -10,6 +10,13 @@ describe.only('Post endpoints', ()=>{
     const comment = helpers.makeCommentsArray();
     const postsDB = helpers.makePostResponse();
     const testUser = users[0];  
+
+
+    function makeAuthHeader(user) {
+        const token = Buffer.from(`${user.user_name}:${user.password}`).toString('base64')
+        return `Basic ${token}`;
+    }
+
 
     // connect to db
     before('make knex instance', () => {
@@ -34,7 +41,7 @@ describe.only('Post endpoints', ()=>{
         // seed database
         beforeEach('inserting data to db', () => {
             // insert users
-            return helpers.seedUsers(db, users)
+            return helpers.seedUser(db, users)
                 .then(() => {
                     console.log('users added')
                     // posts relies on users

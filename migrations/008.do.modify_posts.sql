@@ -1,0 +1,3 @@
+ALTER TABLE posts
+ADD COLUMN group_id INTEGER
+        REFERENCES groups(id)  ON DELETE CASCADE;
