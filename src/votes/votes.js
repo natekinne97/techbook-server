@@ -3,7 +3,6 @@ const express = require('express')
 const {  Voted } = require('../models/schema')
 
 const jsonBodyParser = express.json()
-const xss = require('xss');
 const votesRouter = express.Router()
 const { requireAuth } = require('../middleware/jwt-auth');
 

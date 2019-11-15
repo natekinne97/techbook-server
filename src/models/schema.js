@@ -23,7 +23,7 @@ class Comment extends Model {
                 },
             },
             // get user information on comments
-            user: {
+            users: {
                 relation: Model.HasOneRelation,
                 modelClass: User,
                 join: {
@@ -81,7 +81,7 @@ class Post extends Model{
     static get jsonSchema(){
         return {
             type: 'object',
-            // required: ['post', 'user_id'],
+            required: ['post', 'user_id'],
             properties: {
                 id: {type: 'integer'},
                 post: {type: 'string'},
@@ -198,7 +198,7 @@ class User extends Model {
     static get jsonSchema(){
         return {
             type: 'object',
-            required: ['user_name', 'full_name'],
+            // required: ['user_name', 'full_name'],
             properties: {
                 id: {type: 'integer'},
                 user_name: {type: 'string'},
@@ -206,7 +206,7 @@ class User extends Model {
                 email: {type: 'string'},
                 password: {type: 'string'},
                 resetpasswordtoken: {type: 'string'},
-                resetpasswordexpires: {type: 'string'}
+                resetpasswordexpires: {type: 'integer'}
             }
         }
     }

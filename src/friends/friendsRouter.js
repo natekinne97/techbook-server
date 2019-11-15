@@ -53,6 +53,7 @@ friendsRouter.route('/check/:id')
         
         // test id needs to be 1
         try{
+
             // get the friends data
             const friends = await Friend.query()
                             .where({
@@ -62,7 +63,6 @@ friendsRouter.route('/check/:id')
             
             // check if they are friends
             if(friends.length > 0){
-               
                 return res.status(200).json(friends);
             }else{
                
@@ -98,7 +98,6 @@ friendsRouter.route('/:id')
                    friends_id: id
                });
 
-           console.log(currentFriend, 'current friends');
            // check if users are already friends
            if (currentFriend.id) {
               
@@ -124,9 +123,52 @@ friendsRouter.route('/:id')
            next();
        }
 
-      
-
     });
 
+friendsRouter.route('/:id')
+    .delete(requireAuth, async (req, res, next)=>{
+        // the id is for the person that is going to be added as a friend
+        const id = req.params.id;
+
+
+        // get the current user
+        const user = req.user.id;
+        // put in a try catch if nothing is returned then go on to the next try
+        try {
+            // first check if they are currently friends.
+            const currentFriend = await Friend.query()
+                .where({
+                    user_id: user,
+                    friends_id: id
+                });
+
+            // check if users are already friends
+            if (currentFriend[0].id) {
+                // delete the friend status
+                const friend = await Friend.query()
+                    .where({
+                        user_id: user,
+                        friends_id: id
+                    }).delete();
+                    console.log(friend, 'deleted friend')
+                return res.status(200).json({
+                    message: "You are no longer friends."
+                })
+            }else{
+                console.log('not friends');
+                res.status(404).json({
+                    error: "You are not friends."
+                })
+            }
+
+
+        } catch (err) {
+            console.log('error in deleting')
+            console.log(err);
+            next();
+        }
+
+
+    });
 
 module.exports = friendsRouter;

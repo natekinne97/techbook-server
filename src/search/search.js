@@ -72,7 +72,7 @@ searchRouter.route('/')
                 let cleanPost = posts.map(post=>{
                     return serializePost(post)
                 });
-                
+
                 // serialize groups
                 let groupList = groups.map(group=>{
                     return serializeGroup(group);

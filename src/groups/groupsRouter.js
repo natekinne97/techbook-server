@@ -98,6 +98,7 @@ groupRouter.route('/')
                             
         // check if it was inserted
         if(inserted){
+            console.log(inserted, 'inserted thing');
             res.status(200).json(inserted);
         }else{
             // error not inserted
