@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe('Post endpoints', ()=>{
+describe.only('Post endpoints', ()=>{
     let db;
 
     const posts = helpers.makePostsArray();
@@ -82,16 +82,20 @@ describe('Post endpoints', ()=>{
                 post: "some post thing"
             }
 
+            const fakePostResult = {
+                
+            }
+
             return supertest(app)
                 .post('/api/posts/')
                 .set('Authorization', token)
                 .send(fakePost)
                 .expect(200)
                 .expect(res=>{
-                   
                     expect(res.body).to.have.property('id');
                     expect(res.body.post).to.eql(fakePost.post);
                     expect(res.body.user).to.eql(testUser.full_name);
+                    expect(res.body.date_created);
                 });
 
         });

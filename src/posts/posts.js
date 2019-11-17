@@ -245,7 +245,7 @@ postRouter.route('/')
                .allowInsert('[post, user_id, group_id]')
                .insert(newPost)
                .eager('[users, voted]');
-
+            console.log(postInserted);
            res.status(200).json(serializePost(postInserted));
 
        }catch(err){

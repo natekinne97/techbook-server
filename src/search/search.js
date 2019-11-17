@@ -78,6 +78,12 @@ searchRouter.route('/')
                     return serializeGroup(group);
                 });
 
+                // check if nothing came up
+                if(groupList.length === 0 && cleanPost.length === 0 && people.length === 0){
+                    return res.status(404).json({
+                        error: "No results found."
+                    })
+                }
                
                 // send all the results
                res.status(200).json({
