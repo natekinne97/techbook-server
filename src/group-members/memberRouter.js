@@ -18,9 +18,8 @@ serializeMember = member =>{
 memberRouter.route('/')
         .get(requireAuth,async (req, res, next)=>{
             // get the data
-            const members = await Member.query().eager('users');
-
-            res.status(200).json(members);
+            const members = await Member.query().eager('group');
+            return res.status(200).json(members);
         });
 
 // get groups by user for display on the sidebar
@@ -80,8 +79,6 @@ memberRouter.route('/:id')
                             message: "User is not this group"
                         })
                     }
-                    
-                    // response for when the user is in the group
                    
                 }catch(err){
                     console.log(err);

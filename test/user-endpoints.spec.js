@@ -148,7 +148,7 @@ describe('User endpoints', () => {
                 return supertest(app)
                     .post('/api/users/new-user')
                     .send(newUser)
-                    .expect(201)
+                    .expect(200)
                     .expect(res => {
                         expect(res.body).to.have.property('id')
                         expect(res.body.user_name).to.eql(newUser.user_name)

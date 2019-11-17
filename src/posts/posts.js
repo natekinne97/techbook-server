@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { Post, Member, Friend } = require('../models/schema')
+const { Post, Member, Friend, Group } = require('../models/schema')
 
 const jsonBodyParser = express.json()
 const xss = require('xss');
@@ -9,23 +9,24 @@ const {requireAuth} = require('../middleware/jwt-auth');
 
 // cleanse the post
 serializePost = post=>{
-    
+    // console.log(post, 'before serial');
     return {
         id: post.id,
         post: xss( post.post),
         date_created: post.date_created,
         user: xss(post.users.full_name),
         user_id: post.user_id,
-        votes: post.voted
+        votes: post.sum
     }
 }
 
 // fake post generated when not in any groups
 fakePost = ()=>{
+    let date = new Date();
     return [{
         id: 1,
         post: "Welcome to TeckBook! :)",
-        date_created: Date.now(),
+        date_created: date.toISOString(),
         user: "TeckBook",
         user_id: 0,
         votes: 99
@@ -90,15 +91,26 @@ postRouter.route('/')
             // get the user id
             const user_id = req.user.id;
             
+            // check they want group posts only for a specific group
+            if (id) {
+
+                // this sends back posts specifically for groups
+                const posts = await getPostGroupById(id, db);
+                
+                return res.status(200).json(posts);
+
+            }
+
             // get group id's of groups the user is in.
             const groups = await  Member.query()
                                     .where({
                                         user_id: user_id
                                     });
-            console.log(groups, 'groups');
+           
+            
             // get friends posts
             const friends = await Friend.query()
-                                .where('user_id', `${user_id}`);
+                                  .where('user_id', `${user_id}`);
     
             
             // get the friend id's of users friends.
@@ -125,14 +137,14 @@ postRouter.route('/')
                 })
             }
 
-            console.log(friend_id, 'friend id');
-            console.log(group_ids, 'group ids');
+            
             // check if we should send anything back or just send the fakepost
             if(friends.length === 0 && groups.length === 0){
                 console.log('user is just starting out');
                 const fake_post = await fakePost();
                 return res.status(200).json(fake_post);
             }
+            console.log('shouldnt be getting this far after fake post is sent');
             // default send all groups, friends when loading
             if(!id){
 
@@ -150,19 +162,11 @@ postRouter.route('/')
                 
                 
                 // send all posts
-                res.json(posts);
+                res.status(200).json(posts);
                
                
-            }else if(id){
-                // sends back posts for a specific group
-                
-                   
-                // this sends back posts specifically for groups
-                const posts = await getPostGroupById(id, db);
-                res.status(200).json(posts);    
-
             }
-
+            
         });
 
 
@@ -170,27 +174,83 @@ postRouter.route('/')
 postRouter.route('/')
     .post(requireAuth, jsonBodyParser, async (req, res, next) => {
         const { post } = req.body;
+        const id = req.query.id;
         const user = req.user;
 
+        // check if there is an id
+
+
+        if(id){
+            console.log(id,'id is being used');
+            // check if group id is valid
+            const group = await Group.query()
+                            .where({
+                                id: id
+                            });
+            console.log('checking group exists');
+            // if the group exists allow insert
+            if(group){
+                console.log('group exists');
+                // make new post to insert
+                const newPost = {
+                    post: post,
+                    user_id: user.id,
+                    group_id: id
+                }
+                // validate the post
+                Object.keys(newPost).forEach(key => {
+                    if (!newPost[key]) return res.status(400).json({
+                        error: `Missing field in ${key}`
+                    })
+                });
+
+                // insert the post. allowing the user to only insert
+                // the new post and user_id
+                const postInserted = await Post.query()
+                    .allowInsert('[post, user_id, group_id]')
+                    .insert(newPost)
+                    .eager('[users, voted]');
+
+                return res.status(200).json(serializePost(postInserted));
+
+            }else{
+                return res.status(400).json({
+                    error: "Group does not exist"
+                })
+            }
+        }
+
+
+        // everything below this line is for when there is not an 
+        // id referencing a group
+        
+        // make new post to insert
         const newPost = {
             post: post,
-            user_id: user.id
+            user_id: user.id,
         }
         // ensure there is nothing missing here
         Object.keys(newPost).forEach(key => {
-            if (!newPost[key]) res.status(400).json({
+            if (!newPost[key])return res.status(400).json({
                 error: `Missing field in ${key}`
             })
         });
-        // insert the post. allowing the user to only insert
-        // the new post and user_id
-        const postInserted = await Post.query()
-            .allowInsert('[post, user_id]')
-            .insert(newPost)
-            .eager('users');
 
-        res.json(serializePost(postInserted));
+       try{
 
+          
+           // insert the post. allowing the user to only insert
+           // the new post and user_id
+           const postInserted = await Post.query()
+               .allowInsert('[post, user_id, group_id]')
+               .insert(newPost)
+               .eager('[users, voted]');
+            console.log(postInserted);
+           res.status(200).json(serializePost(postInserted));
+
+       }catch(err){
+           console.log(err);
+       }
     });
 
 module.exports = postRouter;

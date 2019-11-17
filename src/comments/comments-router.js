@@ -20,18 +20,20 @@ serializeComment = comment => {
 
 
 
-// gets all comments for post
+// gets all comments for post with id
 commentRouter.route('/:id')
     .get(requireAuth, async (req, res, next) => {
         try {
+            console.log('getting comments')
             //   find comments for post
             const comments = await Comment.query()
                 .where('post_id', `${req.params.id}`)
                 .eager('users');
-
+                
+            console.log('comments retrieved');
 
             //   check if there are comments
-            if (!comments) res.status(400).json({ error: "no comments found" })
+            if (!comments)return res.status(400).json({ error: "no comments found" })
 
             res.status(200).json(comments.map(serializeComment));
 
@@ -68,7 +70,7 @@ commentRouter.route('/')
             .insert(newComment)
             .eager('users');
 
-        res.json(serializeComment(commmentInserted));
+        res.status(200).json(serializeComment(commmentInserted));
 
     });
 

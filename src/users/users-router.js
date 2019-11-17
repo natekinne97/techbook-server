@@ -45,7 +45,7 @@ usersRouter
         )
             .then(user => {
                 if (user) {
-                    res.status(400).json({
+                    return res.status(400).json({
                         error: "Account already exists"
                     })
                 }
@@ -80,7 +80,7 @@ usersRouter
                                 const sub = user.user_name
                                 const payload = { user_id: user.id }
                                 // send the token
-                                res.status(200)
+                                return res.status(200)
                                     .send({
                                         authToken: AuthService.createJwt(sub, payload),
                                     })
@@ -108,12 +108,12 @@ usersRouter
             
             const users = await User.query()
                 .where('id', `${profile}`);
-            res.status(200).json(serializeUser(users[0]));
+            return res.status(200).json(serializeUser(users[0]));
         }else{
            
             const personal = await User.query()
                 .where('id', `${user.id}`);
-            res.status(200).json(serializeUser(personal[0]));
+            return res.status(200).json(serializeUser(personal[0]));
         }
 
     });

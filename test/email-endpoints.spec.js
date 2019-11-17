@@ -6,6 +6,7 @@ const helpers = require('./test-helpers');
 describe('Email password reset test', () => {
     let db;
     const users = helpers.makeUserArray();
+    const testUser = users[0];
 
     // connect to db
     before('make knex instance', () => {
@@ -24,9 +25,6 @@ describe('Email password reset test', () => {
 
     beforeEach('insert campsites', () => {
         return helpers.seedUser(db, users)
-            .then(() => {
-                console.log('users seeded');
-            })
     })
 
     // first start at the reset request. we want to test
@@ -80,8 +78,14 @@ describe('Email password reset test', () => {
 
     })
 
-    describe('Patch reseting the password', () => {
-
+    it('/forgot returns 200 success and recovery email sent', ()=>{
+        const email = {
+            email:  testUser.email
+        }
+        return supertest(app)
+                .post('/api/reset/forgot')
+                .send(email)
+                .expect(200, "recovery email sent");
     });
 
 });

@@ -1,22 +1,17 @@
-const app = require('../src/app');
-const helpers = require('./test-helpers');
 const knex = require('knex')
+const bcrypt = require('bcryptjs')
+const app = require('../src/app')
+const helpers = require('./test-helpers')
 
-describe('Post endpoints', ()=>{
+describe.only('Post endpoints', ()=>{
     let db;
 
     const posts = helpers.makePostsArray();
     const users = helpers.makeUserArray();
+    const groups = helpers.makeGroupArray();
     const comment = helpers.makeCommentsArray();
     const postsDB = helpers.makePostResponse();
     const testUser = users[0];  
-
-
-    function makeAuthHeader(user) {
-        const token = Buffer.from(`${user.user_name}:${user.password}`).toString('base64')
-        return `Basic ${token}`;
-    }
-
 
     // connect to db
     before('make knex instance', () => {
@@ -37,41 +32,98 @@ describe('Post endpoints', ()=>{
     afterEach('cleanup', () => helpers.cleanTables(db));
 
 
-    describe('Get all posts and comments', ()=>{
+    describe('Get and insert posts', ()=>{
         // seed database
         beforeEach('inserting data to db', () => {
             // insert users
             return helpers.seedUser(db, users)
                 .then(() => {
-                    console.log('users added')
-                    // posts relies on users
-                    return helpers.seedPosts(db, posts)
+                   
+                    return helpers.seedGroups(db, groups)
                         .then(()=>{
-                            // comments relies on posts and users
-                            return helpers.seedComments(db, comment).then(()=>{
-                                console.log('comments seeded');
-                            });
-                        })
-                        .catch(err=>{
-                            console.log(err, 'error');
+                            // posts relies on users
+                            return helpers.seedPosts(db, posts)
+                                .then(() => {
+                                    // comments relies on posts and users
+                                    return helpers.seedComments(db, comment).then(() => {
+                                       
+                                    });
+                                })
+                                .catch(err => {
+                                    console.log(err, 'error');
+                                });
                         });
                 });
         });
-        // make authtoken to access 
-        let token = helpers.makeAuthHeader(testUser);
-        // console.log(toke);
-        // get all posts
-        it('gets all posts with user', ()=>{
+        
+        // get all posts for user
+        it('/api/post/ gets all posts', ()=>{
+            let token = helpers.makeAuthHeader(testUser);
+            return supertest(app)
+                        .get('/api/posts/')
+                        .set('Authorization', token)
+                        .expect(200);
+        });
+
+        // get all posts with group id
+        it('/api/post/ gets all posts for group', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            return supertest(app)
+                .get('/api/posts/?id=1')
+                .set('Authorization', token)
+                .expect(200)
+        });
+        
+        // insert a personal post
+        it('/api/post/ personal post returns inserted post', ()=>{
+            let token = helpers.makeAuthHeader(testUser);
+            // make fake post
+            const fakePost = {
+                post: "some post thing"
+            }
+
+            const fakePostResult = {
+                
+            }
 
             return supertest(app)
-                .get('/api/posts/')
+                .post('/api/posts/')
                 .set('Authorization', token)
-                .expect(200);
+                .send(fakePost)
+                .expect(200)
+                .expect(res=>{
+                    expect(res.body).to.have.property('id');
+                    expect(res.body.post).to.eql(fakePost.post);
+                    expect(res.body.user).to.eql(testUser.full_name);
+                    expect(res.body.date_created);
+                });
+
         });
 
-        it('gets all comments', ()=>{
+        // insert a post with group id
+        it('/api/posts/?id=1 returns post with group id', ()=>{
+            let token = helpers.makeAuthHeader(testUser);
+            // make fake post
+            const fakePost = {
+                post: "some post thing"
+            }
+
+            return supertest(app)
+                .post('/api/posts/?id=1')
+                .set('Authorization', token)
+                .send(fakePost)
+                .expect(200)
+                .expect(res => {
+                  
+                    expect(res.body).to.have.property('id');
+                    expect(res.body.post).to.eql(fakePost.post);
+                    expect(res.body.user).to.eql(testUser.full_name);
+                    
+                });
 
         });
+
+
     });
 
 });
