@@ -57,12 +57,26 @@ commentRouter.route('/')
             post_id: post_id
         }
 
-        // ensure there is nothing missing here
-        Object.keys(newComment).forEach(key => {
-            if (!newComment[key]) res.status(400).json({
-                error: `Missing field in ${key}`
-            })
-        });
+        // validate the post
+        for (const key of Object.keys(newComment)) {
+            if (!newComment[key]) {
+                console.log('kill for keys')
+                return res.status(400).json({
+                    error: `Missing field in ${key}`
+                })
+            }
+        }
+
+        // check if there are characters 
+        for (const key of Object.keys(newComment)) {
+            if (/^ *$/.test(newComment[key])) {
+                console.log('just space found')
+                // It has only spaces, or is empty
+                return res.status(400).json({
+                    error: "Post is only spaces. Must include characters!"
+                })
+            }
+        }
         // insert the post. allowing the user to only insert
         // the new post and user_id
         const commmentInserted = await Comment.query()

@@ -101,7 +101,6 @@ describe('Search end points end points', () => {
                 .send(searchTerm)
                 .expect(200)
                 .expect(res => {
-                  
                     expect(res.body.posts[0]).to.have.property('id');
                     expect(res.body.posts[0].post).to.eql('some post');
                     expect(res.body.posts[0].user);

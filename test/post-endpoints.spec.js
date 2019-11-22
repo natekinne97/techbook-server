@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe.only('Post endpoints', ()=>{
+describe('Post endpoints', ()=>{
     let db;
 
     const posts = helpers.makePostsArray();
@@ -73,6 +73,20 @@ describe.only('Post endpoints', ()=>{
                 .set('Authorization', token)
                 .expect(200)
         });
+
+        // get default post for new user
+        it('/api/post get intro post', ()=>{
+            let token = helpers.makeAuthHeader(users[2]);
+            return supertest(app)
+                .get('/api/posts/')
+                .set('Authorization', token)
+                .expect(200)
+                .expect(res=>{
+                    expect(res.body).to.have.property('id');
+                    expect(res.body.user).to.eql('TeckBook');
+                    expect(res.body.post).to.eql('Welcome to TeckBook! :)');
+                })
+        });
         
         // insert a personal post
         it('/api/post/ personal post returns inserted post', ()=>{
@@ -82,20 +96,39 @@ describe.only('Post endpoints', ()=>{
                 post: "some post thing"
             }
 
-            const fakePostResult = {
-                
-            }
-
+           
             return supertest(app)
                 .post('/api/posts/')
                 .set('Authorization', token)
                 .send(fakePost)
                 .expect(200)
                 .expect(res=>{
+                   
                     expect(res.body).to.have.property('id');
                     expect(res.body.post).to.eql(fakePost.post);
+                    
                     expect(res.body.user).to.eql(testUser.full_name);
                     expect(res.body.date_created);
+                });
+
+        });
+
+        // insert a personal post
+        it('/api/post/ personal post returns 400 just spaces', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            // make fake post
+            const fakePost = {
+                post: " "
+            }
+
+
+            return supertest(app)
+                .post('/api/posts/')
+                .set('Authorization', token)
+                .send(fakePost)
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.error).to.eql("Post is only spaces. Must include characters!"); 
                 });
 
         });
@@ -114,16 +147,55 @@ describe.only('Post endpoints', ()=>{
                 .send(fakePost)
                 .expect(200)
                 .expect(res => {
-                  
                     expect(res.body).to.have.property('id');
                     expect(res.body.post).to.eql(fakePost.post);
-                    expect(res.body.user).to.eql(testUser.full_name);
-                    
+                    expect(res.body.user).to.eql(testUser.full_name); 
                 });
-
         });
 
 
+        // insert a post with group id
+        it('/api/posts/?id=1 returns 200 with group id. space in beginning', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            // make fake post
+            const fakePost = {
+                post: " some post thing"
+            }
+
+            return supertest(app)
+                .post('/api/posts/?id=1')
+                .set('Authorization', token)
+                .send(fakePost)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body).to.have.property('id');
+                    expect(res.body.post).to.eql(fakePost.post);
+                    expect(res.body.user).to.eql(testUser.full_name);
+                });
+        });
+
+
+        // insert a post with group id
+        it('/api/posts/?id=1 returns 400 only spaces from id', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            // make fake post
+            const fakePost = {
+                post: " "
+            }
+
+            return supertest(app)
+                .post('/api/posts/?id=1')
+                .set('Authorization', token)
+                .send(fakePost)
+                .expect(400)
+                .expect(res=>{
+                  
+                    expect(res.body.error).to.eql("Post is only spaces. Must include characters!")
+                });
+               
+        });
+
+       
     });
 
 });

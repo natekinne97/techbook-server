@@ -16,16 +16,26 @@ serializeGroup = group =>{
 }
 
 // cleanse the post
-serializePost = post => {
+serializeSearchedPost = post => {
 
     return {
         id: post.id,
         post: xss(post.post),
         date_created: post.date_created,
-        user: xss(post.users.full_name),
+        user: xss(post.full_name),
         user_id: post.user_id,
         votes: post.voted
     }
+}
+
+// select posts
+getPostForTerm = async (term, db)=>{
+    let post = await db.raw(`select posts.*, sum(voted.vote), users.full_name
+            from  users, posts left outer join voted 
+            on posts.id = voted.post_id  
+            where (users.id = posts.user_id and posts.post ilike  '%${term}%')
+            group by posts.id, voted.post_id, users.full_name;`);
+    return post.rows;
 }
 
 // clean the people
@@ -45,18 +55,27 @@ searchRouter.route('/')
                 const {term} = req.body;
                
                 if(!term){
-                    res.status(400).json({
+                    return res.status(400).json({
                         error: "Must include search term"
                     })
                 }
+
+
+                // check if only spaces
+                if (/^ *$/.test(term)) {
+                    console.log('just space found')
+                    // It has only spaces, or is empty
+                    return res.status(400).json({
+                        error: "Input is only spaces. Must include characters!"
+                    })
+                }
+                
                 
                 // search for users
                 const friends = await User.query()
                                     .where('full_name', 'ilike', `%${term}%`);
                 // search for posts
-                const posts = await Post.query()
-                            .eager('users')
-                            .where('post', 'ilike', `%${term}%`);
+                const posts = await getPostForTerm(term, req.app.get('db'));
                 
                 // search for groups
                 const groups = await Group.query()
@@ -70,7 +89,7 @@ searchRouter.route('/')
 
                 // serialize posts
                 let cleanPost = posts.map(post=>{
-                    return serializePost(post)
+                    return serializeSearchedPost(post)
                 });
 
                 // serialize groups

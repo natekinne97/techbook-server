@@ -31,7 +31,18 @@ usersRouter
                     error: `Missing '${field}' in request body`
                 })
 
-        // TODO: check user_name doesn't start with spaces
+        // check that nothing starts with or is just spaces
+        // validate the post
+        // check if there are characters 
+        for (const key of ['full_name', 'email', 'user_name', 'password']) {
+            if (/^ *$/.test(newPost[key])) {
+                console.log('just space found')
+                // It has only spaces, or is empty
+                return res.status(400).json({
+                    error: "Input is only spaces. Must include characters!"
+                })
+            }
+        }
 
         const passwordError = UserService.validatePassword(password)
 

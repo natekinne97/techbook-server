@@ -24,7 +24,7 @@ const UserService = {
     validatePassword(password) {
         // password less than 8
         if (password.length < 8) {
-            return 'Password be longer than 8 characters'
+            return 'Password must be 8 characters or longer'
         }
         // mak sure its not longer than 72
         if (password.length > 72) {
