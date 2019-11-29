@@ -73,13 +73,26 @@ groupRouter.route('/')
             about: about,
             exp_lvl: exp_lvl
         }
+        // validate the post
+        for (const key of Object.keys(newGroup)) {
+            if (!newGroup[key]) {
+                console.log('kill for keys')
+                return res.status(400).json({
+                    error: `Missing field in ${key}`
+                })
+            }
+        }
 
-        // ensure there is nothing missing here
-        Object.keys(newGroup).forEach(key => {
-            if (!newGroup[key])return res.status(400).json({
-                error: `Missing field in ${key}`
-            })
-        });
+        // check if there are characters 
+        for (const key of Object.keys(newGroup)) {
+            if (/^ *$/.test(newGroup[key])) {
+                console.log('just space found')
+                // It has only spaces, or is empty
+                return res.status(400).json({
+                    error: "Input is only spaces. Must include characters!"
+                })
+            }
+        }
 
         // for checking if the name already exists
         const exist = await Group.query()

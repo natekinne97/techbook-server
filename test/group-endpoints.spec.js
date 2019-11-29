@@ -2,7 +2,7 @@ const app = require('../src/app');
 const helpers = require('./test-helpers');
 const knex = require('knex')
 
-describe('Group end points end points', () => {
+describe.only('Group end points end points', () => {
     let db;
 
     const posts = helpers.makePostsArray();
@@ -123,7 +123,124 @@ describe('Group end points end points', () => {
                     expect(res.body).to.eql(feedback);
                 });
         });
+        
+         // empty groups
+        it('POST /api/groups/ returns 400 null missing first key', ()=>{
+            let token = helpers.makeAuthHeader(testUser);
+            const newGroup = {
+                group_name: "",
+                about: "some stuff",
+                exp_lvl: "some people"
+            }
 
+            return supertest(app)
+                .post('/api/groups/')
+                .set('Authorization', token)
+                .send(newGroup)
+                .expect(400)
+                .expect(res=>{
+                    expect(res.body.error).to.eql("Missing field in group_name")
+                })
+        });
+
+        // empty groups
+        it('POST /api/groups/ returns 400 null missing second key', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            const newGroup = {
+                group_name: "some stuff",
+                about: "",
+                exp_lvl: "some people"
+            }
+
+            return supertest(app)
+                .post('/api/groups/')
+                .set('Authorization', token)
+                .send(newGroup)
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.error).to.eql("Missing field in about")
+                })
+        });
+
+        // empty groups
+        it('POST /api/groups/ returns 400 null missing third key', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            const newGroup = {
+                group_name: "some stuff",
+                about: "some stuff",
+                exp_lvl: ""
+            }
+
+            return supertest(app)
+                .post('/api/groups/')
+                .set('Authorization', token)
+                .send(newGroup)
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.error).to.eql("Missing field in exp_lvl")
+                })
+        });
+
+
+        // just spaces
+        it('POST /api/groups/ returns 400 just spaces first entry', ()=>{
+            let token = helpers.makeAuthHeader(testUser);
+            const newGroup = {
+                group_name: "  ",
+                about: "some stuff",
+                exp_lvl: "dsadsa"
+            }
+
+            return supertest(app)
+                .post('/api/groups/')
+                .set('Authorization', token)
+                .send(newGroup)
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.error)
+                            .to.eql("Input is only spaces. Must include characters!");
+                })
+        })
+
+        // just spaces
+        it('POST /api/groups/ returns 400 just spaces second entry', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            const newGroup = {
+                group_name: "dsaf",
+                about: " ",
+                exp_lvl: "dsadsa"
+            }
+
+            return supertest(app)
+                .post('/api/groups/')
+                .set('Authorization', token)
+                .send(newGroup)
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.error)
+                        .to.eql("Input is only spaces. Must include characters!");
+                })
+        })
+
+        // just spaces
+        it('POST /api/groups/ returns 400 just spaces first entry', () => {
+            let token = helpers.makeAuthHeader(testUser);
+            const newGroup = {
+                group_name: "dsa",
+                about: "some stuff",
+                exp_lvl: "  "
+            }
+
+            return supertest(app)
+                .post('/api/groups/')
+                .set('Authorization', token)
+                .send(newGroup)
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.error)
+                        .to.eql("Input is only spaces. Must include characters!");
+                })
+        })
 
     }); 
 
