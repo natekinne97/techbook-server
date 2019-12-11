@@ -24,14 +24,13 @@ serializeComment = comment => {
 commentRouter.route('/:id')
     .get(requireAuth, async (req, res, next) => {
         try {
-            console.log('getting comments')
+           
             //   find comments for post
             const comments = await Comment.query()
                 .where('post_id', `${req.params.id}`)
                 .eager('users');
                 
-            console.log('comments retrieved');
-
+           
             //   check if there are comments
             if (!comments)return res.status(400).json({ error: "no comments found" })
 
@@ -60,7 +59,7 @@ commentRouter.route('/')
         // validate the post
         for (const key of Object.keys(newComment)) {
             if (!newComment[key]) {
-                console.log('kill for keys')
+               
                 return res.status(400).json({
                     error: `Missing field in ${key}`
                 })
@@ -70,7 +69,7 @@ commentRouter.route('/')
         // check if there are characters 
         for (const key of Object.keys(newComment)) {
             if (/^ *$/.test(newComment[key])) {
-                console.log('just space found')
+               
                 // It has only spaces, or is empty
                 return res.status(400).json({
                     error: "Post is only spaces. Must include characters!"
@@ -80,11 +79,17 @@ commentRouter.route('/')
         // insert the post. allowing the user to only insert
         // the new post and user_id
         const commmentInserted = await Comment.query()
-            .allowInsert('[comment, user_id, post_id]')
+            // .allowInsert('[comment, user_id, post_id]')
             .insert(newComment)
             .eager('users');
-
-        res.status(200).json(serializeComment(commmentInserted));
+      
+        const getInsertedComment = await Comment.query()
+                                    .eager('users')
+                                    .where({
+                                        id: `${commmentInserted.id}`
+                                    });
+        
+        return res.status(200).json(serializeComment(getInsertedComment[0]));
 
     });
 

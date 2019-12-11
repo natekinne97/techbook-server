@@ -12,18 +12,16 @@ resRouter
     .route('/forgot')
     .post(jsonBodyParser, async (req, res, next) => {
         const { email } = req.body;
-        console.log(email);
+       
         // check if email was sent to api
         if (!email){
-            console.log('no email')
+           
             return res.status(400).json({
                 error: 'Missing email in request body.',
             })
 
         }
-           
-        console.log('checking users email');
-
+         
         try{
             // check user with email
             const user = await User.query()
@@ -32,7 +30,7 @@ resRouter
                             }).first();
             
             if(!user || user.length === 0){
-                console.log('user not found');
+               
                 return res.status(400).json({
                    error: "User not found."
                 })
@@ -53,7 +51,7 @@ resRouter
                                 .update(update);
             
             if(updated === 0){
-                console.log('failed to update');
+              
                 return res.status(400).json({
                     error: "Error. Could not create token"
                 })
@@ -86,7 +84,7 @@ resRouter
             transporter.sendMail(mailOptions, function (err, response) {
 
                 if (err) {
-                    console.log(err);
+                 
                     return res.status(400).json({
                         error: 'Unable to send',
                         message: 'Please try again later'
@@ -116,7 +114,7 @@ resRouter.route('/reset-check')
             })
         }
 
-        console.log('getting user');
+      
         // find user with token
         const user = await User.query()
                             .where({

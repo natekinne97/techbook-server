@@ -31,12 +31,18 @@ usersRouter
                     error: `Missing '${field}' in request body`
                 })
 
+        const newUser = {
+            user_name: user_name,
+            email: email,
+            full_name: full_name,
+            password: password
+        }
         // check that nothing starts with or is just spaces
         // validate the post
         // check if there are characters 
         for (const key of ['full_name', 'email', 'user_name', 'password']) {
-            if (/^ *$/.test(newPost[key])) {
-                console.log('just space found')
+            if (/^ *$/.test(newUser[key])) {
+               
                 // It has only spaces, or is empty
                 return res.status(400).json({
                     error: "Input is only spaces. Must include characters!"
@@ -144,12 +150,11 @@ usersRouter.route('/update-user')
        
         // check if user info has been added
         Object.keys(updateUser).forEach(key=>{
-            
             if(!updateUser[key])return res.status(400).json({
                 error: `Missing key in ${key}.`
             })
         });
-
+        // tells whether it updated or not
         const updated = await User.query()
                     .update(updateUser)
                     .where('id', `${user.id}`);
@@ -159,9 +164,12 @@ usersRouter.route('/update-user')
             return  res.status(400).json({
                 error: "Unable to update profile"
             })
-        }
-
-        res.status(200).json(updated[0]);
+        } 
+        // retrieve the updated user to send back
+        const getUpdatedUser = await User.query()
+                                .where('id', `${user.id}`);
+       
+        return res.status(200).json(serializeUser(getUpdatedUser));
 
     });
 

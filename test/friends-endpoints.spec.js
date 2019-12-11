@@ -80,6 +80,8 @@ describe('Friend end points end points', () => {
                     expect(res.body[0]).to.have.property('id');
                     expect(res.body[0]).to.have.property('friends_id');
                     expect(res.body[0]).to.have.property('user_id');
+                    expect(res.body[0]).to.have.property('friend_name');
+                    expect(res.body[0].friend_name).to.eql('person')
                 });
         }); 
 
@@ -87,14 +89,14 @@ describe('Friend end points end points', () => {
         it('GET /api/friends/ get friends id for a user', () => {
             let token = helpers.makeAuthHeader(testUser);
             return supertest(app)
-                .get('/api/friends/?id=1')
+                .get('/api/friends/?id=2')
                 .set('Authorization', token)
                 .expect(200)
                 .expect(res => {
-                   
                     expect(res.body[0]).to.have.property('id');
                     expect(res.body[0]).to.have.property('friends_id');
                     expect(res.body[0]).to.have.property('user_id');
+                    expect(res.body[0]).to.have.property('friend_name');
                 });
         }); 
 

@@ -14,7 +14,7 @@ serializePost = post=>{
         id: post.id,
         post: xss(post.post),
         date_created: post.date_created,
-        user: xss(post.full_name),
+        full_name: xss(post.full_name),
         user_id: post.user_id,
         votes: post.sum
     }
@@ -25,14 +25,14 @@ serializePost = post=>{
 // fake post generated when not in any groups
 fakePost = ()=>{
     let date = new Date();
-    return {
+    return [{
         id: 1,
         post: "Welcome to TeckBook! :)",
         date_created: date.toISOString(),
-        user: "TeckBook",
+        full_name: "TeckBook",
         user_id: 0,
         votes: 99
-    }
+    }]
 }
 
 // accepts a groupd of ids
@@ -136,7 +136,6 @@ postRouter.route('/')
                 
                 // extract the ids
                 group_ids = groups.map(group=>{
-                    console.log(group, 'groups user is in');
                     return group.group_id;
                 })
                 
@@ -155,9 +154,10 @@ postRouter.route('/')
             
             // check if we should send anything back or just send the fakepost
             if(friends.length === 0 && groups.length === 0){
-                console.log('user is just starting out');
+                // make the fake post
                 const fake_post = await fakePost();
-                return res.status(200).json(fake_post);
+                // send the fake post as an array
+                return res.status(200).json([serializePost(fake_post[0])]);
             }
            
             // default send all groups, friends when loading
@@ -226,15 +226,14 @@ postRouter.route('/')
                 // check if there are characters 
                 for(const key of Object.keys(newPost)){
                     if (/^ *$/.test(newPost[key])) {
-                        console.log('just space found')
+                       
                         // It has only spaces, or is empty
                         return res.status(400).json({
                             error: "Post is only spaces. Must include characters!"
                         })
                     }
                 }
-                console.log('still going');
-
+               
                 // insert the post. allowing the user to only insert
                 // the new post and user_id
                 const postInserted = await Post.query()
@@ -246,7 +245,7 @@ postRouter.route('/')
                 return res.status(200).json(serializePost(posts[0]));
                 
             }else{
-                console.log('kill for error')
+               
                 return res.status(400).json({
                     error: "Group does not exist"
                 })
@@ -265,7 +264,7 @@ postRouter.route('/')
         // make sure all keys were sent
         for (const key of Object.keys(newPost)) {
             if (!newPost[key]) {
-                console.log('kill for keys')
+               
                 return res.status(400).json({
                     error: `Missing field in ${key}`
                 })
@@ -275,7 +274,7 @@ postRouter.route('/')
         // test if there are characters in submission 
         for (const key of Object.keys(newPost)) {
             if (/^ *$/.test(newPost[key])) {
-                console.log('just space found')
+               
                 // It has only spaces, or is empty
                 return res.status(400).json({
                     error: "Post is only spaces. Must include characters!"

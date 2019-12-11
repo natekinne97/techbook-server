@@ -86,6 +86,10 @@ function makeFriendsArray(){
         {
             user_id: 1,
             friends_id: 2
+        },
+        {
+            user_id: 2,
+            friends_id: 1
         }
     ]
 }

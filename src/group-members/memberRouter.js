@@ -39,13 +39,13 @@ memberRouter.route('/users-groups')
                 return res.status(200).json(group.map(serializeMember))
             } else {
                
-                return res.status(404).json({
+                return res.status(200).json({
                     message: "user is not in any groups"
                 })
             }
         } catch (err) {
             console.log(err);
-            res.status(400).json({
+            return res.status(400).json({
                 error: "Something went wrong"
             })
         }
@@ -82,7 +82,7 @@ memberRouter.route('/:id')
                    
                 }catch(err){
                     console.log(err);
-                    res.status(400).json({
+                    return res.status(400).json({
                         error: "an error occured"
                     })
                 }

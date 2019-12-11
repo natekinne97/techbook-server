@@ -7,7 +7,7 @@ pg.defaults.ssl = true
 let connection;
 // check if we are running tests
 if(process.env.NODE_ENV === 'test'){
-    console.log('using test databas');
+    console.log('using test database');
     // switch to test database
     connection = process.env.TEST_DB_URL;
 }else{
