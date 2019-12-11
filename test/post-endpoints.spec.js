@@ -82,9 +82,10 @@ describe('Post endpoints', ()=>{
                 .set('Authorization', token)
                 .expect(200)
                 .expect(res=>{
-                    expect(res.body).to.have.property('id');
-                    expect(res.body.user).to.eql('TeckBook');
-                    expect(res.body.post).to.eql('Welcome to TeckBook! :)');
+                    
+                    expect(res.body[0]).to.have.property('id');
+                    expect(res.body[0].user).to.eql('TeckBook');
+                    expect(res.body[0].post).to.eql('Welcome to TeckBook! :)');
                 })
         });
         

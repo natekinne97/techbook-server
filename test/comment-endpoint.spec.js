@@ -96,6 +96,10 @@ describe('Comment end points', ()=>{
                 .set('Authorization', token)
                 .send(fakeComment)
                 .expect(200)
+                .expect(res=>{
+                    console.log(res.body, 'comment insert response');
+                    expect(res.body.date_created);
+                })
         });
 
     });

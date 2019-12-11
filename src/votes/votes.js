@@ -18,7 +18,6 @@ votesRouter.route('/')
         const { vote, post_id } = req.body;
         const user = req.user;
 
-
         if (!user) {
             res.status(400).json("no user");
         }
@@ -28,7 +27,6 @@ votesRouter.route('/')
                 error: "Must include post id."
             })
         }
-
 
         // check that the client sent the right number
         if (Number(vote) != 1 && Number(vote) != -1) {
@@ -63,19 +61,69 @@ votesRouter.route('/')
                     })
                     .sum('vote');
 
-                res.status(200).json(finished);
+                return res.status(200).json(finished);
             }
 
         } else {
 
-            res.status(200).json({
+            return res.status(200).json({
                 message: "user already voted"
             })
         }
 
-
-
     });
 
+votesRouter.route('/')
+    .patch( jsonBodyParser, async (req, res, next)=>{
+        const { vote, post_id } = req.body;
+        const user = 3;
+
+        if (!user) {
+            res.status(400).json("no user");
+        }
+        // ensure the client sent the post id
+        if (!post_id) {
+            return res.status(400).json({
+                error: "Must include post id."
+            })
+        }
+
+        // check that the client sent the right number
+        if (Number(vote) != 1 && Number(vote) != -1) {
+            return res.status(400).json({
+                error: "Votes can either be 1 or -1."
+            })
+        }
+
+        // find post where the user voted
+        const findVote = await Voted.query()
+                            .where({
+                               post_id: Number(post_id),
+                                user_id: Number(user)
+                            })
+                            .update({
+                                post_id: Number(post_id),
+                                user_id: Number(user),
+                                vote: vote
+                            })
+       if(findVote){
+           const finished = await Voted.query()
+               .where({
+                   post_id: post_id
+               })
+               .sum('vote');
+
+         return  res.status(200).json(finished);
+       } else {
+
+           return res.status(400).json({
+               message: "Failed to update"
+           })
+       }
+      
+       
+                
+        
+    });
 
 module.exports = votesRouter;

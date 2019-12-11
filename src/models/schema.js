@@ -181,6 +181,14 @@ class Friend extends Model{
                     from: 'users.id',
                     to: 'friends.user_id'
                 }
+            },
+            users: {
+                relation: Model.HasManyRelation,
+                modelClass: User,
+                join: {
+                    from: 'users.id',
+                    to: 'friends.friend_id'
+                }
             }
         }
     }

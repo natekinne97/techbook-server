@@ -76,7 +76,7 @@ groupRouter.route('/')
         // validate the post
         for (const key of Object.keys(newGroup)) {
             if (!newGroup[key]) {
-                console.log('kill for keys')
+               
                 return res.status(400).json({
                     error: `Missing field in ${key}`
                 })
@@ -86,7 +86,7 @@ groupRouter.route('/')
         // check if there are characters 
         for (const key of Object.keys(newGroup)) {
             if (/^ *$/.test(newGroup[key])) {
-                console.log('just space found')
+              
                 // It has only spaces, or is empty
                 return res.status(400).json({
                     error: "Input is only spaces. Must include characters!"
@@ -111,8 +111,8 @@ groupRouter.route('/')
                             
         // check if it was inserted
         if(inserted){
-            console.log(inserted, 'inserted thing');
-            res.status(200).json(inserted);
+          
+            return res.status(200).json(inserted);
         }else{
             // error not inserted
            

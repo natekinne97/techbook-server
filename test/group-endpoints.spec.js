@@ -2,7 +2,7 @@ const app = require('../src/app');
 const helpers = require('./test-helpers');
 const knex = require('knex')
 
-describe.only('Group end points end points', () => {
+describe('Group end points end points', () => {
     let db;
 
     const posts = helpers.makePostsArray();

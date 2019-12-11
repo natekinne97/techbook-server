@@ -63,7 +63,7 @@ searchRouter.route('/')
 
                 // check if only spaces
                 if (/^ *$/.test(term)) {
-                    console.log('just space found')
+                   
                     // It has only spaces, or is empty
                     return res.status(400).json({
                         error: "Input is only spaces. Must include characters!"

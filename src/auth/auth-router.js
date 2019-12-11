@@ -25,7 +25,7 @@ authRouter
             .then(dbUser => {
                 if (!dbUser)
                     return res.status(400).json({
-                        error: 'Incorrect user_name or password',
+                        error: 'Incorrect user name or password',
                     })
                 // check password against db
 
@@ -51,7 +51,7 @@ authRouter
 
 // refreshes the the user token
 authRouter.post('/refresh', requireAuth, (req, res) => {
-    console.log('refreshing token');
+   
     const sub = req.user.user_name
     const payload = { user_id: req.user.id }
     res.send({
